@@ -1,6 +1,10 @@
 package core;
 
 
+import core.annotations.Bean;
+import core.annotations.ComponentScan;
+import core.util.SearchPackageClassUtil;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,8 +15,31 @@ import java.util.Map;
 public class JavaConfigApplicationContext implements ApplicationContext {
     Map<String, Class> beanMap = new HashMap<>();
 
+    /**
+     * 由于只支持Bean注解,所以这样处理
+     * @param config javaConfig类,用于配置TinySpring的类
+     */
     public JavaConfigApplicationContext(Class config) {
+        ComponentScan componentScan = (ComponentScan) config.getDeclaredAnnotation(ComponentScan.class);
+        if (componentScan != null) {
+            Class[] basePackages = componentScan.basePackages();
+            for (Class basePackage : basePackages) {
+                String name = basePackage.getPackage().getName();
+                String[] searchPackageClass = SearchPackageClassUtil.searchPackageClass(name);
 
+                for (String packageClass : searchPackageClass) {
+                    try {
+                        Class<?> aClass = Class.forName(packageClass);
+                        Bean beanAnnotation = aClass.getAnnotation(Bean.class);
+                        if (beanAnnotation != null) {
+                            beanMap.put(beanAnnotation.value(), aClass);
+                        }
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -20,6 +47,11 @@ public class JavaConfigApplicationContext implements ApplicationContext {
      */
     @Override
     public Object getBean(String beanName) {
-        return beanMap.get(beanName);//
+        try {
+            return beanMap.get(beanName).newInstance();//只支持具有无参构造器的bean
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
