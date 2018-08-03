@@ -3,6 +3,8 @@ jdk:
   - openjdk8
 
 
+
+
 script: "mvn cobertura:cobertura"
 
 after_success:
