@@ -41,12 +41,21 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
                     try {
                         Class<?> aClass = Class.forName(packageClass);
                         Bean beanAnnotation = aClass.getAnnotation(Bean.class);
+                        String beanName = "";
                         if (beanAnnotation != null) {
-                            beanMap.put(beanAnnotation.value(), aClass);
+                            beanName = beanAnnotation.value();
+                        } else {
+                            final char[] chars = aClass.getSimpleName().toCharArray();
+                            chars[0] = Character.toUpperCase(chars[0]);
+                            beanName = new String(chars);
                         }
-                        //TODO:添加scope的单例初始化缓存
+                        beanMap.put(beanName, aClass);
 
-
+                        //添加scope的单例初始化缓存
+                        Scope scope = aClass.getAnnotation(Scope.class);
+                        if (scope != null && scope.value() == ScopeType.Singleton) {
+                            singletonBeanCache.put(beanName, aClass.newInstance());
+                        }
 
                     } catch (Throwable e) {
                         e.printStackTrace();
@@ -62,11 +71,11 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     @Override
     public Object getBean(String beanName) {
         try {
-            Class beanClass = beanMap.get(beanName);
-            Scope scope = (Scope) beanClass.getAnnotation(Scope.class);
-            if (scope != null && scope.value() == ScopeType.Singleton) {
-
+            Object bean;
+            if ((bean = singletonBeanCache.get(beanName)) != null) {
+                return bean;
             }
+            Class beanClass = beanMap.get(beanName);
             return beanClass.newInstance();//只支持具有无参构造器的bean
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
  */
 public class JavaConfigTest {
     @Test
-    public void testConfig() {
+    void testConfig() {
         ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig.class);
     }
 }
