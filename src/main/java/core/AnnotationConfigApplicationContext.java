@@ -15,7 +15,7 @@ import java.util.Map;
  * @author Vant
  * @version 2018/8/3 上午 12:41
  */
-public class JavaConfigApplicationContext implements ApplicationContext {
+public class AnnotationConfigApplicationContext implements ApplicationContext {
     private Map<String, Class> beanMap = new HashMap<>();
     private Map<String, Object> singletonBeanCache = new HashMap<>();
 
@@ -25,7 +25,7 @@ public class JavaConfigApplicationContext implements ApplicationContext {
      *
      * @param config javaConfig类,用于配置TinySpring的类
      */
-    public JavaConfigApplicationContext(Class config) {
+    public AnnotationConfigApplicationContext(Class config) {
         if (config.getAnnotation(Configuration.class) == null) {
             return;
         }
@@ -45,6 +45,7 @@ public class JavaConfigApplicationContext implements ApplicationContext {
                             beanMap.put(beanAnnotation.value(), aClass);
                         }
                         //TODO:添加scope的单例初始化缓存
+
 
 
                     } catch (Throwable e) {
