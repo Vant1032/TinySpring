@@ -8,11 +8,14 @@ import java.lang.annotation.Target;
 
 /**
  * @author Vant
- * @version 2018/8/3 上午 12:42
+ * @version 2018/8/3 上午 8:17
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.FIELD})
 @Documented
-public @interface Bean {
-    String value() default "";
+public @interface Autowired {
+    /**
+     * 如果为true,未找到时抛出异常,为false,则未找到时值为null
+     */
+    boolean required() default true;
 }

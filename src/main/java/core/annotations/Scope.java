@@ -7,12 +7,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 指定bean的产生方式,
  * @author Vant
- * @version 2018/8/3 上午 12:42
+ * @version 2018/8/3 上午 8:41
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Documented
-public @interface Bean {
-    String value() default "";
+public @interface Scope {
+    ScopeType value() default ScopeType.Singleton;
 }
