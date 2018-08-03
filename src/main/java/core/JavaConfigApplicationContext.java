@@ -8,7 +8,6 @@ import core.annotations.Scope;
 import core.annotations.ScopeType;
 import core.util.SearchPackageClassUtil;
 
-import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,6 +45,8 @@ public class JavaConfigApplicationContext implements ApplicationContext {
                             beanMap.put(beanAnnotation.value(), aClass);
                         }
                         //TODO:添加scope的单例初始化缓存
+
+
                     } catch (Throwable e) {
                         e.printStackTrace();
                     }
