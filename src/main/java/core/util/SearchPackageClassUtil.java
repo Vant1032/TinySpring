@@ -3,6 +3,7 @@ package core.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.annotation.Annotation;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -14,6 +15,7 @@ import java.util.jar.JarFile;
 
 /**
  * 给定包名,搜索指定包下所有的类
+ *
  * @author Vant
  * @version 2018/8/2 上午 7:48
  */
@@ -30,9 +32,12 @@ public class SearchPackageClassUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        if (!resources.hasMoreElements()) {
+            throw new IllegalArgumentException("找不到此包");
+        }
 
         Set<String> classNames = new HashSet<>();
-        while (resources.hasMoreElements()) {
+        do {
             URL url = resources.nextElement();
             String protocol = url.getProtocol();
 
@@ -63,7 +68,8 @@ public class SearchPackageClassUtil {
                     e.printStackTrace();
                 }
             }
-        }
+        } while (resources.hasMoreElements());
+
         String[] names = classNames.toArray(new String[0]);
         for (int i = 0; i < names.length; i++) {
             names[i] = names[i].substring(0, names[i].length() - 6);
