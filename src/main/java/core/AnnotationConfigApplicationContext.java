@@ -6,6 +6,7 @@ import core.annotations.ComponentScan;
 import core.annotations.Configuration;
 import core.annotations.Scope;
 import core.annotations.ScopeType;
+import core.exception.NoSuchBeanDefinitionException;
 import core.util.SearchPackageClassUtil;
 import core.util.StringUtil;
 
