@@ -13,5 +13,6 @@ class AnnotationConfigApplicationContextTest {
     @Test
     void getBean() {
         //TODO:添加测试
+
     }
 }
