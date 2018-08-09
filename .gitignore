@@ -28,3 +28,6 @@ hs_err_pid*
 TinySpring.iml
 secret.md
 !/src/test/
+local/
+target/
+

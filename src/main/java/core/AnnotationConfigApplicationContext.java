@@ -1,15 +1,18 @@
 package core;
 
 
+import core.annotations.Autowired;
 import core.annotations.Bean;
 import core.annotations.ComponentScan;
 import core.annotations.Configuration;
 import core.annotations.Scope;
 import core.annotations.ScopeType;
+import core.exception.BeanInstantiationException;
 import core.exception.NoSuchBeanDefinitionException;
 import core.util.SearchPackageClassUtil;
 import core.util.StringUtil;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,15 +48,17 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
             for (String packageClass : searchPackageClass) {
                 try {
                     Class<?> aClass = Class.forName(packageClass);
+
+                    //处理bean
                     Bean beanAnnotation = aClass.getAnnotation(Bean.class);
                     if (beanAnnotation == null) continue;
 
                     String beanName;
                     if ("".equals(beanAnnotation.value())) {
-                        beanName = beanAnnotation.value();
-                    } else {
                         final String simpleName = aClass.getSimpleName();
                         beanName = StringUtil.firstCharUpper(simpleName);
+                    } else {
+                        beanName = beanAnnotation.value();
                     }
                     beanMap.put(beanName, aClass);
                     rBeanMap.put(aClass, beanName);
@@ -64,6 +69,19 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
                         singletonBeanCache.put(beanName, aClass.newInstance());
                     }
 
+                    //处理autowired
+                    final Field[] declaredFields = aClass.getDeclaredFields();
+                    for (Field declaredField : declaredFields) {
+                        final Autowired autowired = declaredField.getAnnotation(Autowired.class);
+                        if (autowired == null) continue;
+
+                        if (autowired.required()) {
+
+                        } else {
+
+                        }
+                    }
+
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }
@@ -71,8 +89,9 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         }
     }
 
+
     /**
-     * @return 如果没有找到则返回null
+     * @return 如果没有找到则抛异常
      */
     @Override
     public Object getBean(String beanName) {
@@ -84,12 +103,13 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
             Class beanClass = beanMap.get(beanName);
             return beanClass.newInstance();//只支持具有无参构造器的bean
         } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
+            throw new BeanInstantiationException();
         }
-        return null;
     }
 
-
+    /**
+     * @return 若没有找到则抛异常
+     */
     @Override
     public <T> T getBean(Class<T> requireType) {
         final String s = rBeanMap.get(requireType);
@@ -103,20 +123,18 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
             if (o != null) {
                 return (T) o;
             } else {
-                throw new NoSuchBeanDefinitionException();
+                throw new NoSuchBeanDefinitionException(s);
             }
         }
 
-        Object o = null;
-        try {
-            o = beanMap.get(s).newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
+
+        if (!beanMap.containsKey(s)) {
+            throw new NoSuchBeanDefinitionException(s);
         }
-        if (o != null) {
-            return (T) o;
-        } else {
-            throw new NoSuchBeanDefinitionException();
+        try {
+            return (T) beanMap.get(s).newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new BeanInstantiationException();
         }
     }
 }
