@@ -9,9 +9,11 @@ import core.annotations.Scope;
 import core.annotations.ScopeType;
 import core.exception.BeanInstantiationException;
 import core.exception.NoSuchBeanDefinitionException;
+import core.exception.SpringInitException;
 import core.util.SearchPackageClassUtil;
 import core.util.StringUtil;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,9 +23,8 @@ import java.util.Map;
  * @version 2018/8/3 上午 12:41
  */
 public class AnnotationConfigApplicationContext implements ApplicationContext {
-    private Map<String, Class> beanMap = new HashMap<>();
+    private Map<String, BeanDefinition> beanMap = new HashMap<>();
     private Map<Class, String> rBeanMap = new HashMap<>();
-    private Map<String, Object> singletonBeanCache = new HashMap<>();
 
 
     /**
@@ -46,46 +47,56 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
             String[] searchPackageClass = SearchPackageClassUtil.searchPackageClass(name);
 
             for (String packageClass : searchPackageClass) {
-                try {
-                    Class<?> aClass = Class.forName(packageClass);
-
-                    //处理bean
-                    Bean beanAnnotation = aClass.getAnnotation(Bean.class);
-                    if (beanAnnotation == null) continue;
-
-                    String beanName;
-                    if ("".equals(beanAnnotation.value())) {
-                        final String simpleName = aClass.getSimpleName();
-                        beanName = StringUtil.firstCharUpper(simpleName);
-                    } else {
-                        beanName = beanAnnotation.value();
-                    }
-                    beanMap.put(beanName, aClass);
-                    rBeanMap.put(aClass, beanName);
-
-                    //添加scope的单例初始化缓存
-                    Scope scope = aClass.getAnnotation(Scope.class);
-                    if (scope != null && scope.value() == ScopeType.Singleton) {
-                        singletonBeanCache.put(beanName, aClass.newInstance());
-                    }
-
-                    //处理autowired
-                    final Field[] declaredFields = aClass.getDeclaredFields();
-                    for (Field declaredField : declaredFields) {
-                        final Autowired autowired = declaredField.getAnnotation(Autowired.class);
-                        if (autowired == null) continue;
-
-                        if (autowired.required()) {
-
-                        } else {
-
-                        }
-                    }
-
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
+                handleScannedClass(packageClass);
             }
+        }
+    }
+
+    private void handleScannedClass(String packageClass) {
+        try {
+            Class<?> aClass = Class.forName(packageClass);
+
+            //处理bean
+            Bean beanAnnotation = aClass.getAnnotation(Bean.class);
+            if (beanAnnotation == null) return;
+
+            BeanDefinition beanDefinition = new BeanDefinition();
+            String beanName;
+            if ("".equals(beanAnnotation.value())) {
+                final String simpleName = aClass.getSimpleName();
+                beanName = StringUtil.firstCharUpper(simpleName);
+            } else {
+                beanName = beanAnnotation.value();
+            }
+            beanDefinition.name = beanName;
+            beanDefinition.clazz = aClass;
+            beanMap.put(beanName, beanDefinition);
+            rBeanMap.put(aClass, beanName);
+
+            //添加scope的单例初始化缓存
+            Scope scope = aClass.getAnnotation(Scope.class);
+            if (scope != null && scope.value() == ScopeType.Singleton) {
+                beanDefinition.instance = aClass.newInstance();
+            }
+
+            //处理autowired
+            BeanWiredData wiredData = new BeanWiredData();
+            beanDefinition.wiredData = wiredData;
+            //fields
+            final Field[] declaredFields = aClass.getDeclaredFields();
+            for (Field declaredField : declaredFields) {
+                final Autowired autowired = declaredField.getAnnotation(Autowired.class);
+                if (autowired == null) continue;
+                wiredData.add(declaredField);
+            }
+            //Constructors
+            final Constructor<?>[] declaredConstructors = aClass.getDeclaredConstructors();
+            for (Constructor<?> declaredConstructor : declaredConstructors) {
+                //TODO:
+            }
+
+        } catch (Throwable e) {
+            throw new SpringInitException(e);
         }
     }
 
@@ -95,15 +106,18 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
      */
     @Override
     public Object getBean(String beanName) {
+        if (!beanMap.containsKey(beanName)) {
+            throw new NoSuchBeanDefinitionException();
+        }
         try {
             Object bean;
-            if ((bean = singletonBeanCache.get(beanName)) != null) {
+            if ((bean = beanMap.get(beanName).instance) != null) {
                 return bean;
             }
-            Class beanClass = beanMap.get(beanName);
+            Class beanClass = beanMap.get(beanName).clazz;
             return beanClass.newInstance();//只支持具有无参构造器的bean
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new BeanInstantiationException();
+            throw new BeanInstantiationException(e);
         }
     }
 
@@ -116,25 +130,6 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         if (s == null) {
             throw new NoSuchBeanDefinitionException();
         }
-
-        final Scope scope = requireType.getAnnotation(Scope.class);
-        if (scope != null && scope.value() == ScopeType.Singleton) {
-            final Object o = singletonBeanCache.get(requireType);
-            if (o != null) {
-                return (T) o;
-            } else {
-                throw new NoSuchBeanDefinitionException(s);
-            }
-        }
-
-
-        if (!beanMap.containsKey(s)) {
-            throw new NoSuchBeanDefinitionException(s);
-        }
-        try {
-            return (T) beanMap.get(s).newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new BeanInstantiationException();
-        }
+        return (T) getBean(s);
     }
 }
