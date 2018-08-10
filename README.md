@@ -5,3 +5,5 @@
 
 ## 实现功能
 1. 注解@Bean
+2. @Autowired,可以用在成员变量或constructor上
+3. @Scope

@@ -18,7 +18,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Vant
@@ -44,13 +47,39 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         }
 
         Class[] basePackages = componentScan.basePackages();
+        Set<String> packageNames = new HashSet<>();
         for (Class basePackage : basePackages) {
             String name = basePackage.getPackage().getName();
-            String[] searchPackageClass = SearchPackageClassUtil.searchPackageClass(name);
-
-            for (String packageClass : searchPackageClass) {
-                handleScannedClass(packageClass);
+            packageNames.add(name);
+        }
+        final String[] nameStrs = packageNames.toArray(new String[0]);
+        int size = 0;
+        for (int i = 0; i < nameStrs.length; i++) {
+            if (nameStrs[i] == null) continue;
+            for (int j = i + 1; j < nameStrs.length; j++) {
+                if (nameStrs[j] == null) continue;
+                if (nameStrs[i].contains(nameStrs[j])) {
+                    nameStrs[j] = null;
+                    size++;
+                } else if (nameStrs[j].contains(nameStrs[i])) {
+                    nameStrs[i] = null;
+                    size++;
+                    break;
+                }
             }
+        }
+        size = nameStrs.length - size;
+        String[] uniquePackage = new String[size];
+        for (int i = 0; i < nameStrs.length; i++) {
+            if (nameStrs[i] != null) {
+                uniquePackage[--size] = nameStrs[i];
+            }
+        }
+        //TODO:处理重复包注解
+
+        String[] searchPackageClass = SearchPackageClassUtil.searchPackageClass(name);
+        for (String packageClass : searchPackageClass) {
+            handleScannedClass(packageClass);
         }
 
         //TODO:添加单例缓存
