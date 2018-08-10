@@ -16,4 +16,6 @@ public class SpringTest {
         final RedDeliciousApple redDeliciousApple = context.getBean(RedDeliciousApple.class);
         assertNotNull(redDeliciousApple.getApple());
     }
+
+
 }

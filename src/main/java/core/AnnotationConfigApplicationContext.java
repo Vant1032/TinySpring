@@ -15,6 +15,8 @@ import core.util.StringUtil;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,6 +52,15 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
                 handleScannedClass(packageClass);
             }
         }
+
+        //TODO:添加单例缓存
+        for (Class beanClass : rBeanMap.keySet()) {
+            final Scope scope = (Scope) beanClass.getAnnotation(Scope.class);
+            //默认单例模式
+            if (scope == null || scope.value() == ScopeType.Singleton) {
+                //依赖getBean
+            }
+        }
     }
 
     private void handleScannedClass(String packageClass) {
@@ -70,29 +81,37 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
             }
             beanDefinition.name = beanName;
             beanDefinition.clazz = aClass;
-            beanMap.put(beanName, beanDefinition);
+            final BeanDefinition previous = beanMap.put(beanName, beanDefinition);
+            if (previous != null) {
+                throw new SpringInitException("the bean named " + beanName + "is already exist");
+            }
             rBeanMap.put(aClass, beanName);
 
-            //添加scope的单例初始化缓存
-            Scope scope = aClass.getAnnotation(Scope.class);
-            if (scope != null && scope.value() == ScopeType.Singleton) {
-                beanDefinition.instance = aClass.newInstance();
-            }
 
             //处理autowired
             BeanWiredData wiredData = new BeanWiredData();
             beanDefinition.wiredData = wiredData;
+            //Constructors(最多只能有一个Constructor可以autowired,否则报错)
+            final Constructor<?>[] declaredConstructors = aClass.getDeclaredConstructors();
+            boolean already = false;
+            for (Constructor<?> declaredConstructor : declaredConstructors) {
+                final Autowired autowired = declaredConstructor.getAnnotation(Autowired.class);
+                if (autowired != null) {
+                    if (already) {
+                        throw new SpringInitException(aClass.getName() + " have multiple constructor");
+                    } else {
+                        wiredData.setConstructor(declaredConstructor);
+                        already = true;
+                    }
+                }
+            }
+
             //fields
             final Field[] declaredFields = aClass.getDeclaredFields();
             for (Field declaredField : declaredFields) {
                 final Autowired autowired = declaredField.getAnnotation(Autowired.class);
                 if (autowired == null) continue;
                 wiredData.add(declaredField);
-            }
-            //Constructors
-            final Constructor<?>[] declaredConstructors = aClass.getDeclaredConstructors();
-            for (Constructor<?> declaredConstructor : declaredConstructors) {
-                //TODO:
             }
 
         } catch (Throwable e) {
@@ -109,14 +128,42 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         if (!beanMap.containsKey(beanName)) {
             throw new NoSuchBeanDefinitionException();
         }
+
+        //根据wiredData构建
+        final BeanDefinition beanDefinition = beanMap.get(beanName);
         try {
-            Object bean;
-            if ((bean = beanMap.get(beanName).instance) != null) {
-                return bean;
+            final BeanWiredData wiredData = beanDefinition.wiredData;
+            if (wiredData == null) {
+                if (beanDefinition.instance != null) {
+                    return beanDefinition.instance;
+                }
+                return beanDefinition.clazz.newInstance();
             }
-            Class beanClass = beanMap.get(beanName).clazz;
-            return beanClass.newInstance();//只支持具有无参构造器的bean
-        } catch (InstantiationException | IllegalAccessException e) {
+
+            //构建constructor
+            final Constructor constructor = wiredData.getConstructor();
+            Object object;
+            if (constructor == null) {
+                object = beanDefinition.clazz.newInstance();
+            } else {
+                final Class[] parameterTypes = constructor.getParameterTypes();
+                Object[] objects = new Object[parameterTypes.length];
+                for (int i = 0; i < parameterTypes.length; i++) {
+                    objects[i] = getBean(parameterTypes[i]);
+                }
+                object = constructor.newInstance(objects);
+            }
+            //构建field
+            final ArrayList<Field> fields = wiredData.getFields();
+            for (Field field : fields) {
+                if (!field.isAccessible()) {
+                    field.setAccessible(true);
+                }
+                field.set(object, getBean(field.getType()));
+            }
+
+            return object;
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new BeanInstantiationException(e);
         }
     }

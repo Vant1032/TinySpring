@@ -1,5 +1,6 @@
 package core;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
@@ -11,7 +12,16 @@ public class BeanWiredData {
     /**
      * 需要autowired的field
      */
-    ArrayList<Field> fields = new ArrayList<>();
+    private ArrayList<Field> fields = new ArrayList<>();
+    private Constructor constructor;
+
+    public Constructor getConstructor() {
+        return constructor;
+    }
+
+    public void setConstructor(Constructor constructor) {
+        this.constructor = constructor;
+    }
 
     public void add(Field field) {
         this.fields.add(field);
