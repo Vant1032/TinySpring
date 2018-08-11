@@ -2,6 +2,7 @@ package core.autowired;
 
 import core.AnnotationConfigApplicationContext;
 import core.autowired.constructor.Pear;
+import core.notexist.CauseWrong;
 import core.exception.NoSuchBeanDefinitionException;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,7 +24,7 @@ public class SpringTest {
     void testAutowiredNotExist() {
         //将会模拟autowired真实应用场景
         assertThrows(NoSuchBeanDefinitionException.class, () -> {
-            AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig.class);
+            AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigNotExist.class);
             final CauseWrong bean = context.getBean(CauseWrong.class);
         });
     }
@@ -33,5 +34,13 @@ public class SpringTest {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigConstructor.class);
         final Pear pear = context.getBean(Pear.class);
         assertNotNull(pear.getApple());
+    }
+
+    @Test
+    void testSingleton() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigConstructor.class);
+        final Pear pear = context.getBean(Pear.class);
+        final Pear pear1 = context.getBean(Pear.class);
+        assertTrue(pear == pear1);
     }
 }

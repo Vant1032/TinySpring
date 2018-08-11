@@ -1,4 +1,4 @@
-package core.autowired;
+package core.notexist;
 
 import core.annotations.Autowired;
 import core.annotations.Bean;

@@ -17,9 +17,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -59,12 +59,12 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
             for (int j = i + 1; j < nameStrs.length; j++) {
                 if (nameStrs[j] == null) continue;
                 if (nameStrs[i].contains(nameStrs[j])) {
-                    nameStrs[j] = null;
-                    size++;
-                } else if (nameStrs[j].contains(nameStrs[i])) {
                     nameStrs[i] = null;
                     size++;
                     break;
+                } else if (nameStrs[j].contains(nameStrs[i])) {
+                    nameStrs[j] = null;
+                    size++;
                 }
             }
         }
@@ -75,19 +75,25 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
                 uniquePackage[--size] = nameStrs[i];
             }
         }
-        //TODO:处理重复包注解
-
-        String[] searchPackageClass = SearchPackageClassUtil.searchPackageClass(name);
-        for (String packageClass : searchPackageClass) {
-            handleScannedClass(packageClass);
+        assert size == 0;
+        //处理重复包注解
+        Set<String> packClass = new HashSet<>();
+        for (String pac : uniquePackage) {
+            String[] searchPackageClass = SearchPackageClassUtil.searchPackageClass(pac);
+            Collections.addAll(packClass, searchPackageClass);
         }
 
-        //TODO:添加单例缓存
-        for (Class beanClass : rBeanMap.keySet()) {
-            final Scope scope = (Scope) beanClass.getAnnotation(Scope.class);
+        for (String aClass : packClass) {
+            handleScannedClass(aClass);
+        }
+
+        //添加单例缓存
+        for (BeanDefinition beanDefinition : beanMap.values()) {
+            final Scope scope = (Scope) beanDefinition.clazz.getAnnotation(Scope.class);
             //默认单例模式
             if (scope == null || scope.value() == ScopeType.Singleton) {
                 //依赖getBean
+                beanDefinition.instance = getBean(beanDefinition.clazz);
             }
         }
     }
@@ -160,12 +166,13 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
 
         //根据wiredData构建
         final BeanDefinition beanDefinition = beanMap.get(beanName);
+        if (beanDefinition.instance != null) {
+            return beanDefinition.instance;
+        }
         try {
             final BeanWiredData wiredData = beanDefinition.wiredData;
             if (wiredData == null) {
-                if (beanDefinition.instance != null) {
-                    return beanDefinition.instance;
-                }
+
                 return beanDefinition.clazz.newInstance();
             }
 
@@ -204,7 +211,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     public <T> T getBean(Class<T> requireType) {
         final String s = rBeanMap.get(requireType);
         if (s == null) {
-            throw new NoSuchBeanDefinitionException();
+            throw new NoSuchBeanDefinitionException(requireType.getName());
         }
         return (T) getBean(s);
     }
