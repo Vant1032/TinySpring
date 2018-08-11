@@ -9,6 +9,6 @@ import core.notexist.CauseWrong;
  * @version 2018/8/11 上午 11:58
  */
 @Configuration
-@ComponentScan(basePackages = {CauseWrong.class})
+@ComponentScan(basePackageClasses = {CauseWrong.class})
 public class SpringConfigNotExist {
 }

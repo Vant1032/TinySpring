@@ -41,6 +41,6 @@ public class SpringTest {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigConstructor.class);
         final Pear pear = context.getBean(Pear.class);
         final Pear pear1 = context.getBean(Pear.class);
-        assertTrue(pear == pear1);
+        assertSame(pear, pear1);
     }
 }

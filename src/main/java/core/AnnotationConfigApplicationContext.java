@@ -39,14 +39,14 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
      */
     public AnnotationConfigApplicationContext(Class config) {
         if (config.getAnnotation(Configuration.class) == null) {
-            return;
+            throw new SpringInitException(config.getName() + "is not annotated by Configuration");
         }
         ComponentScan componentScan = (ComponentScan) config.getDeclaredAnnotation(ComponentScan.class);
         if (componentScan == null) {
             return;
         }
 
-        Class[] basePackages = componentScan.basePackages();
+        Class[] basePackages = componentScan.basePackageClasses();
         Set<String> packageNames = new HashSet<>();
         for (Class basePackage : basePackages) {
             String name = basePackage.getPackage().getName();
@@ -75,7 +75,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
                 uniquePackage[--size] = nameStrs[i];
             }
         }
-        assert size == 0;
+
         //处理重复包注解
         Set<String> packClass = new HashSet<>();
         for (String pac : uniquePackage) {
@@ -110,7 +110,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
             String beanName;
             if ("".equals(beanAnnotation.value())) {
                 final String simpleName = aClass.getSimpleName();
-                beanName = StringUtil.firstCharUpper(simpleName);
+                beanName = StringUtil.firstCharLower(simpleName);
             } else {
                 beanName = beanAnnotation.value();
             }
