@@ -11,11 +11,12 @@ import cc.vant.core.exception.BeanInstantiationException;
 import cc.vant.core.exception.NoSuchBeanDefinitionException;
 import cc.vant.core.exception.SpringInitException;
 import cc.vant.core.util.SearchPackageClassUtil;
-import cc.vant.core.util.StringUtil;
+import cc.vant.core.util.StringUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,16 +36,38 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     /**
      * @param config javaConfig类,用于配置TinySpring的类,该类必须用@Configuration注解
      */
-    public AnnotationConfigApplicationContext(Class config) {
+    public <T> AnnotationConfigApplicationContext(Class<T> config) {
         if (config.getAnnotation(Configuration.class) == null) {
             throw new SpringInitException(config.getName() + "is not annotated by Configuration");
         }
-        ComponentScan componentScan = (ComponentScan) config.getDeclaredAnnotation(ComponentScan.class);
+        ComponentScan componentScan = config.getDeclaredAnnotation(ComponentScan.class);
         if (componentScan == null) {
             return;
         }
 
 
+        //TODO:添加bean放在方法上的支持
+        final Method[] methods = config.getMethods();
+        Map<Class, Method> beanMethod = new HashMap<>();
+        for (Method method : methods) {
+            final Bean bean = method.getAnnotation(Bean.class);
+            if (bean != null) {
+                String beanName;
+                if ("".equals(bean.value())) {
+                    beanName = StringUtils.firstCharLower(config.getSimpleName());
+                } else {
+                    beanName = bean.value();
+                }
+                beanMethod.put(method.getReturnType(), method);
+            }
+        }
+        T cfgInstance = null;
+
+        try {
+            cfgInstance = config.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new SpringInitException("can not instantiate " + config.getName(), e);
+        }
 
         Set<String> packClass = scanPackage(componentScan);
 
@@ -64,7 +87,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     }
 
     /**
-     * @return
+     * @return 所有扫描到的类,已经去重
      */
     private Set<String> scanPackage(ComponentScan componentScan) {
         //由于包扫描会扫描子包,所以如果有子包存在,就删除,防止重复扫描,降低开销
@@ -118,7 +141,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
             String beanName;
             if ("".equals(beanAnnotation.value())) {
                 final String simpleName = aClass.getSimpleName();
-                beanName = StringUtil.firstCharLower(simpleName);
+                beanName = StringUtils.firstCharLower(simpleName);
             } else {
                 beanName = beanAnnotation.value();
             }
@@ -171,6 +194,8 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         if (!beanMap.containsKey(beanName)) {
             throw new NoSuchBeanDefinitionException();
         }
+
+
 
         //根据wiredData构建
         final BeanDefinition beanDefinition = beanMap.get(beanName);

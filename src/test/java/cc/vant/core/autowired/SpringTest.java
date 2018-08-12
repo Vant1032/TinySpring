@@ -45,4 +45,11 @@ public class SpringTest {
         final Pear pear1 = context.getBean(Pear.class);
         assertSame(pear, pear1);
     }
+
+    @Test
+    void testOnConfiguration() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(cc.vant.core.autowired.onconfiguration.SpringConfig.class);
+        final KiwiFruit kiwiFruit = (KiwiFruit) context.getBean("kiwiFruit");
+        assertEquals(kiwiFruit.getWeight(), 1000);
+    }
 }
