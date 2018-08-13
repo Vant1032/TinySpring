@@ -34,13 +34,14 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
 
 
     /**
+     * TODO:添加多config功能
      * @param config javaConfig类,用于配置TinySpring的类,该类必须用@Configuration注解
      */
-    public <T> AnnotationConfigApplicationContext(Class<T> config) {
+    public <T> AnnotationConfigApplicationContext(Class<?> config) {
         if (config.getAnnotation(Configuration.class) == null) {
             throw new SpringInitException(config.getName() + "is not annotated by Configuration");
         }
-        ComponentScan componentScan = config.getDeclaredAnnotation(ComponentScan.class);
+        ComponentScan componentScan = (ComponentScan) config.getDeclaredAnnotation(ComponentScan.class);
         if (componentScan == null) {
             return;
         }
@@ -61,7 +62,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
                 beanMethod.put(method.getReturnType(), method);
             }
         }
-        T cfgInstance = null;
+        Object cfgInstance = null;
 
         try {
             cfgInstance = config.newInstance();
