@@ -1,12 +1,12 @@
 package cc.vant.core;
 
 
-import cc.vant.core.annotations.Scope;
-import cc.vant.core.annotations.ScopeType;
 import cc.vant.core.annotations.Autowired;
 import cc.vant.core.annotations.Bean;
 import cc.vant.core.annotations.ComponentScan;
 import cc.vant.core.annotations.Configuration;
+import cc.vant.core.annotations.Scope;
+import cc.vant.core.annotations.ScopeType;
 import cc.vant.core.exception.BeanInstantiationException;
 import cc.vant.core.exception.NoSuchBeanDefinitionException;
 import cc.vant.core.exception.SpringInitException;
@@ -19,76 +19,68 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
  * @author Vant
  * @version 2018/8/3 上午 12:41
  */
-public class AnnotationConfigApplicationContext implements ApplicationContext {
-    private Map<String, BeanDefinition> beanMap = new HashMap<>();
-    private Map<Class, String> rBeanMap = new HashMap<>();
+public class AnnotationConfigApplicationContext implements BeanFactory {
 
 
     /**
      * TODO:添加多config功能
+     *
      * @param config javaConfig类,用于配置TinySpring的类,该类必须用@Configuration注解
      */
     public <T> AnnotationConfigApplicationContext(Class<?> config) {
+
         if (config.getAnnotation(Configuration.class) == null) {
             throw new SpringInitException(config.getName() + "is not annotated by Configuration");
         }
-        ComponentScan componentScan = (ComponentScan) config.getDeclaredAnnotation(ComponentScan.class);
+        ComponentScan componentScan = config.getDeclaredAnnotation(ComponentScan.class);
         if (componentScan == null) {
             return;
         }
 
 
-        //TODO:添加bean放在方法上的支持
-        final Method[] methods = config.getMethods();
-        Map<Class, Method> beanMethod = new HashMap<>();
-        for (Method method : methods) {
-            final Bean bean = method.getAnnotation(Bean.class);
-            if (bean != null) {
-                String beanName;
-                if ("".equals(bean.value())) {
-                    beanName = StringUtils.firstCharLower(config.getSimpleName());
-                } else {
-                    beanName = bean.value();
-                }
-                beanMethod.put(method.getReturnType(), method);
-            }
-        }
-        Object cfgInstance = null;
-
+        //添加@Bean@Scope放在方法上的支持
+        Object cfgInstance;
         try {
             cfgInstance = config.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             throw new SpringInitException("can not instantiate " + config.getName(), e);
         }
+        final Method[] methods = config.getDeclaredMethods();
+        for (Method method : methods) {
+            final Bean bean = method.getAnnotation(Bean.class);
+            if (bean != null) {
+                String beanName;
+                if ("".equals(bean.value())) {
+                    beanName = StringUtils.firstCharLower(method.getReturnType().getSimpleName());
+                } else {
+                    beanName = bean.value();
+                }
+                final ConfigBeanGenerator generator = new ConfigBeanGenerator(cfgInstance, method);
+                final Scope scope = method.getAnnotation(Scope.class);
+                if (scope != null && scope.value() == ScopeType.Prototype) {
+                    generator.setScopeType(ScopeType.Prototype);
+                }
+                BeanContainer.addBean(beanName, method.getReturnType(), generator);
+            }
+        }
+
 
         Set<String> packClass = scanPackage(componentScan);
 
         for (String aClass : packClass) {
             handleScannedClass(aClass);
         }
-
-        //添加单例缓存
-        for (BeanDefinition beanDefinition : beanMap.values()) {
-            final Scope scope = (Scope) beanDefinition.clazz.getAnnotation(Scope.class);
-            //默认单例模式
-            if (scope == null || scope.value() == ScopeType.Singleton) {
-                //依赖getBean
-                beanDefinition.instance = getBean(beanDefinition.clazz);
-            }
-        }
     }
 
     /**
-     * @return 所有扫描到的类,已经去重
+     * @return 所有扫描到的类, 已经去重
      */
     private Set<String> scanPackage(ComponentScan componentScan) {
         //由于包扫描会扫描子包,所以如果有子包存在,就删除,防止重复扫描,降低开销
@@ -132,55 +124,57 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
 
     private void handleScannedClass(String packageClass) {
         try {
-            Class<?> aClass = Class.forName(packageClass);
+            Class<?> beanClass = Class.forName(packageClass);
 
             //处理bean
-            Bean beanAnnotation = aClass.getAnnotation(Bean.class);
+            Bean beanAnnotation = beanClass.getAnnotation(Bean.class);
             if (beanAnnotation == null) return;
 
-            BeanDefinition beanDefinition = new BeanDefinition();
             String beanName;
             if ("".equals(beanAnnotation.value())) {
-                final String simpleName = aClass.getSimpleName();
+                final String simpleName = beanClass.getSimpleName();
                 beanName = StringUtils.firstCharLower(simpleName);
             } else {
                 beanName = beanAnnotation.value();
             }
-            beanDefinition.name = beanName;
-            beanDefinition.clazz = aClass;
-            final BeanDefinition previous = beanMap.put(beanName, beanDefinition);
-            if (previous != null) {
-                throw new SpringInitException("the bean named " + beanName + "is already exist");
-            }
-            rBeanMap.put(aClass, beanName);
 
 
             //处理autowired
-            BeanWiredData wiredData = new BeanWiredData();
-            beanDefinition.wiredData = wiredData;
             //Constructors(最多只能有一个Constructor可以autowired,否则报错)
-            final Constructor<?>[] declaredConstructors = aClass.getDeclaredConstructors();
+            DefaultBeanGenerator generator;
+            final Constructor<?>[] declaredConstructors = beanClass.getDeclaredConstructors();
             boolean already = false;
+            Constructor<?> constructor = null;
             for (Constructor<?> declaredConstructor : declaredConstructors) {
                 final Autowired autowired = declaredConstructor.getAnnotation(Autowired.class);
                 if (autowired != null) {
                     if (already) {
-                        throw new SpringInitException(aClass.getName() + " have multiple constructor");
+                        throw new SpringInitException(beanClass.getName() + " have multiple constructor");
                     } else {
-                        wiredData.setConstructor(declaredConstructor);
+                        constructor = declaredConstructor;
                         already = true;
                     }
                 }
             }
-
+            if (constructor == null) {
+                generator = new DefaultBeanGenerator(beanClass);
+            } else {
+                generator = new DefaultBeanGenerator(constructor);
+            }
             //fields
-            final Field[] declaredFields = aClass.getDeclaredFields();
+            final Field[] declaredFields = beanClass.getDeclaredFields();
             for (Field declaredField : declaredFields) {
                 final Autowired autowired = declaredField.getAnnotation(Autowired.class);
                 if (autowired == null) continue;
-                wiredData.add(declaredField);
+                generator.addField(declaredField);
             }
 
+            //scope
+            final Scope scope = beanClass.getAnnotation(Scope.class);
+            if (scope != null && scope.value() == ScopeType.Prototype) {
+                generator.setScopeType(ScopeType.Prototype);
+            }
+            BeanContainer.addBean(beanName, beanClass, generator);
         } catch (Throwable e) {
             throw new SpringInitException(e);
         }
@@ -192,47 +186,14 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
      */
     @Override
     public Object getBean(String beanName) {
-        if (!beanMap.containsKey(beanName)) {
+        final BeanGenerator generator = BeanContainer.getGenerator(beanName);
+        if (generator == null) {
             throw new NoSuchBeanDefinitionException();
         }
 
-
-
-        //根据wiredData构建
-        final BeanDefinition beanDefinition = beanMap.get(beanName);
-        if (beanDefinition.instance != null) {
-            return beanDefinition.instance;
-        }
         try {
-            final BeanWiredData wiredData = beanDefinition.wiredData;
-            if (wiredData == null) {
-                return beanDefinition.clazz.newInstance();
-            }
-
-            //构建constructor
-            final Constructor constructor = wiredData.getConstructor();
-            Object object;
-            if (constructor == null) {
-                object = beanDefinition.clazz.newInstance();
-            } else {
-                final Class[] parameterTypes = constructor.getParameterTypes();
-                Object[] objects = new Object[parameterTypes.length];
-                for (int i = 0; i < parameterTypes.length; i++) {
-                    objects[i] = getBean(parameterTypes[i]);
-                }
-                object = constructor.newInstance(objects);
-            }
-            //构建field
-            final ArrayList<Field> fields = wiredData.getFields();
-            for (Field field : fields) {
-                if (!field.isAccessible()) {
-                    field.setAccessible(true);
-                }
-                field.set(object, getBean(field.getType()));
-            }
-
-            return object;
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            return generator.generate(this);
+        } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
             throw new BeanInstantiationException(e);
         }
     }
@@ -242,10 +203,18 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
      */
     @Override
     public <T> T getBean(Class<T> requireType) {
-        final String s = rBeanMap.get(requireType);
-        if (s == null) {
-            throw new NoSuchBeanDefinitionException(requireType.getName());
+        final ArrayList<String> beanNames = BeanContainer.getBeanNames(requireType);
+        if (beanNames == null) {
+            throw new NoSuchBeanDefinitionException();
+        } else {
+            if (beanNames.size() == 1) {
+                try {
+                    return (T) BeanContainer.getGenerator(beanNames.get(0)).generate(this);
+                } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+                    throw new BeanInstantiationException(beanNames.get(0) + " instantiate error ");
+                }
+            }
+            throw new BeanInstantiationException("the bean is not unique");
         }
-        return (T) getBean(s);
     }
 }

@@ -2,9 +2,9 @@ package cc.vant.core;
 
 /**
  * @author Vant
- * @version 2018/8/3 上午 12:39
+ * @version 2018/8/14 上午 9:51
  */
-public interface ApplicationContext {
+public interface BeanFactory {
     Object getBean(String beanName);
 
     <T> T getBean(Class<T> requireType);

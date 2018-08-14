@@ -6,8 +6,9 @@ package cc.vant.core.util;
  */
 public class StringUtils {
     public static String firstCharLower(String string) {
-        StringBuilder sb = new StringBuilder(string.length());
-        sb.append(Character.toLowerCase(string.substring(0, 1).charAt(0))).append(string.substring(1));
-        return sb.toString();
+        char[] buf = new char[string.length()];
+        buf[0] = Character.toLowerCase(string.substring(0, 1).charAt(0));
+        System.arraycopy(string.substring(1).toCharArray(), 0, buf, 1, string.length() - 1);
+        return String.valueOf(buf);
     }
 }

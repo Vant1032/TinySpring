@@ -1,7 +1,6 @@
 package cc.vant.core.annotations;
 
 import cc.vant.core.AnnotationConfigApplicationContext;
-import cc.vant.core.ApplicationContext;
 
 /**
  * @author Vant
@@ -10,6 +9,6 @@ import cc.vant.core.ApplicationContext;
 public class SpringTest {
     @org.junit.jupiter.api.Test
     void testConfig() {
-        ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig.class);
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig.class);
     }
 }
