@@ -1,6 +1,9 @@
 package cc.vant.core;
 
 import cc.vant.core.exception.SpringInitException;
+import cc.vant.core.getbean.AFather;
+import cc.vant.core.getbean.IFather;
+import cc.vant.core.getbean.SpringConfig;
 import cc.vant.core.multiconfig.SpringConfig1;
 import cc.vant.core.multiconfig.SpringConfig2;
 import cc.vant.core.multiconfig.SpringConfig3;
@@ -20,5 +23,14 @@ class AnnotationConfigApplicationContextTest {
         assertThrows(SpringInitException.class, () -> {
             AnnotationConfigApplicationContext context1 = new AnnotationConfigApplicationContext(SpringConfig1.class, SpringConfig2.class, SpringConfig3.class);
         });
+    }
+
+    @Test
+    void abstractBean() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig.class);
+        final IFather father = context.getBean(IFather.class);
+        father.foo();
+        final AFather bean = context.getBean(AFather.class);
+        bean.bar();
     }
 }

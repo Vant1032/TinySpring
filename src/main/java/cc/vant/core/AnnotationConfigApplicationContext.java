@@ -34,7 +34,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
      * @param configs javaConfig类,用于配置TinySpring的类,该类必须用@Configuration注解
      */
     public AnnotationConfigApplicationContext(Class<?>... configs) {
-        Set<String> scanedPackage = new HashSet<>();
+        Set<String> scannedPackage = new HashSet<>();
         for (Class<?> config : configs) {
             if (config.getAnnotation(Configuration.class) == null) {
                 throw new SpringInitException(config.getName() + " is not annotated by Configuration");
@@ -44,10 +44,10 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
             handleConfigBean(config);
             ComponentScan componentScan = config.getDeclaredAnnotation(ComponentScan.class);
             if (componentScan != null) {
-                scanedPackage.addAll(scanPackage(componentScan));
+                scannedPackage.addAll(scanPackage(componentScan));
             }
         }
-        for (String clazz : scanedPackage) {
+        for (String clazz : scannedPackage) {
             handleScannedClass(clazz);
         }
     }
