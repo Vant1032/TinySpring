@@ -27,25 +27,29 @@ import java.util.Set;
  * @version 2018/8/3 上午 12:41
  */
 public class AnnotationConfigApplicationContext implements BeanFactory {
-
-
     /**
-     * TODO:添加多config功能
-     *
-     * @param config javaConfig类,用于配置TinySpring的类,该类必须用@Configuration注解
+     * @param configs javaConfig类,用于配置TinySpring的类,该类必须用@Configuration注解
      */
-    public <T> AnnotationConfigApplicationContext(Class<?> config) {
+    public AnnotationConfigApplicationContext(Class<?>... configs) {
+        Set<String> scanedPackage = new HashSet<>();
+        for (Class<?> config : configs) {
+            if (config.getAnnotation(Configuration.class) == null) {
+                throw new SpringInitException(config.getName() + " is not annotated by Configuration");
+            }
 
-        if (config.getAnnotation(Configuration.class) == null) {
-            throw new SpringInitException(config.getName() + "is not annotated by Configuration");
+            //添加@Bean@Scope放在方法上的支持
+            handleConfigBean(config);
+            ComponentScan componentScan = config.getDeclaredAnnotation(ComponentScan.class);
+            if (componentScan != null) {
+                scanedPackage.addAll(scanPackage(componentScan));
+            }
         }
-        ComponentScan componentScan = config.getDeclaredAnnotation(ComponentScan.class);
-        if (componentScan == null) {
-            return;
+        for (String clazz : scanedPackage) {
+            handleScannedClass(clazz);
         }
+    }
 
-
-        //添加@Bean@Scope放在方法上的支持
+    private void handleConfigBean(Class<?> config) {
         Object cfgInstance;
         try {
             cfgInstance = config.newInstance();
@@ -70,16 +74,10 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
                 BeanContainer.addBean(beanName, method.getReturnType(), generator);
             }
         }
-
-
-        Set<String> packClass = scanPackage(componentScan);
-
-        for (String aClass : packClass) {
-            handleScannedClass(aClass);
-        }
     }
 
     /**
+     * TODO:将此函数分解用以支持更优的搜索方式
      * @return 所有扫描到的类, 已经去重
      */
     private Set<String> scanPackage(ComponentScan componentScan) {

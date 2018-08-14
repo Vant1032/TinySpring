@@ -8,6 +8,7 @@ import cc.vant.core.AnnotationConfigApplicationContext;
  */
 public class SpringTest {
     @org.junit.jupiter.api.Test
+    @org.junit.jupiter.api.DisplayName("根据Config类创建Context")
     void testConfig() {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig.class);
     }

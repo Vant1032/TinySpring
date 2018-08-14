@@ -18,7 +18,7 @@ public class ConfigBeanGenerator implements BeanGenerator {
     private Object beanInstance;
 
     /**
-     * @param method         如果method有参数,必须保证method被@autowired注解
+     * @param method 如果method有参数,必须保证method被@autowired注解
      */
     public ConfigBeanGenerator(Object configInstance, Method method) {
         this.configInstance = configInstance;

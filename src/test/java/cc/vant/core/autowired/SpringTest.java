@@ -4,10 +4,15 @@ import cc.vant.core.AnnotationConfigApplicationContext;
 import cc.vant.core.autowired.constructor.Pear;
 import cc.vant.core.autowired.constructor.SpringConfigConstructor;
 import cc.vant.core.autowired.onconfiguration.KiwiFruit;
-import cc.vant.core.notexist.CauseWrong;
 import cc.vant.core.exception.NoSuchBeanDefinitionException;
+import cc.vant.core.notexist.CauseWrong;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Vant
@@ -32,6 +37,7 @@ public class SpringTest {
     }
 
     @Test
+    @DisplayName("Autowired作用于构造器上")
     void testAutowiredConstructor() {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigConstructor.class);
         final Pear pear = context.getBean(Pear.class);
@@ -39,6 +45,7 @@ public class SpringTest {
     }
 
     @Test
+    @DisplayName("单例模式")
     void testSingleton() {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigConstructor.class);
         final Pear pear = context.getBean(Pear.class);
@@ -47,6 +54,7 @@ public class SpringTest {
     }
 
     @Test
+    @DisplayName("利用Config类的方法创建Bean")
     void testOnConfiguration() {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(cc.vant.core.autowired.onconfiguration.SpringConfig.class);
         final KiwiFruit kiwiFruit = (KiwiFruit) context.getBean("kiwiFruit");
