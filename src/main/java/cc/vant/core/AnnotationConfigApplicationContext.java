@@ -8,6 +8,7 @@ import cc.vant.core.annotations.Configuration;
 import cc.vant.core.annotations.Scope;
 import cc.vant.core.annotations.ScopeType;
 import cc.vant.core.exception.BeanInstantiationException;
+import cc.vant.core.exception.MultipleBeanDefinition;
 import cc.vant.core.exception.NoSuchBeanDefinitionException;
 import cc.vant.core.exception.SpringInitException;
 import cc.vant.core.util.SearchPackageClassUtil;
@@ -17,12 +18,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * 添加了@Autowired接口和抽象类支持
  * @author Vant
  * @version 2018/8/3 上午 12:41
  */
@@ -77,16 +80,17 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
     }
 
     /**
-     * TODO:将此函数分解用以支持更优的搜索方式
      * @return 所有扫描到的类, 已经去重
      */
-    private Set<String> scanPackage(ComponentScan componentScan) {
+    private Set<String> scanPackage(ComponentScan... componentScans) {
         //由于包扫描会扫描子包,所以如果有子包存在,就删除,防止重复扫描,降低开销
-        Class[] basePackages = componentScan.basePackageClasses();
         Set<String> packageNames = new HashSet<>();
-        for (Class basePackage : basePackages) {
-            String name = basePackage.getPackage().getName();
-            packageNames.add(name);
+        for (ComponentScan componentScan : componentScans) {
+            Class[] basePackages = componentScan.basePackageClasses();
+            for (Class basePackage : basePackages) {
+                String name = basePackage.getPackage().getName();
+                packageNames.add(name);
+            }
         }
         final String[] nameStrs = packageNames.toArray(new String[0]);
         int size = 0;
@@ -111,7 +115,13 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
                 uniquePackage[--size] = nameStrs[i];
             }
         }
-        //处理重复包注解
+        return searchClass(uniquePackage);
+    }
+
+    /**
+     * @return className
+     */
+    private Set<String> searchClass(String[] uniquePackage) {
         Set<String> packClass = new HashSet<>();
         for (String pac : uniquePackage) {
             String[] searchPackageClass = SearchPackageClassUtil.searchPackageClass(pac);
@@ -197,10 +207,30 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
     }
 
     /**
+     * 遇到抽象类或接口时会遍历所有bean以找到子类
      * @return 若没有找到则抛异常
+     * @throws cc.vant.core.exception.MultipleBeanDefinition 若找到多个匹配项
      */
     @Override
     public <T> T getBean(Class<T> requireType) {
+        if (requireType.isInterface() || Modifier.isAbstract(requireType.getModifiers())) {
+            boolean unique = true;
+            Object beanInstance = null;
+            for (Class<?> beanClass : BeanContainer.rBeanMap.keySet()) {
+                if (requireType.isAssignableFrom(beanClass)) {
+                    if (unique) {
+                        unique = false;
+                        beanInstance = getBean(beanClass);
+                    } else {
+                        throw new MultipleBeanDefinition(requireType.getName());
+                    }
+                }
+            }
+            if (beanInstance == null) {
+                throw new NoSuchBeanDefinitionException(requireType.getName());
+            }
+            return (T) beanInstance;
+        }
         final ArrayList<String> beanNames = BeanContainer.getBeanNames(requireType);
         if (beanNames == null) {
             throw new NoSuchBeanDefinitionException();
@@ -212,7 +242,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
                     throw new BeanInstantiationException(beanNames.get(0) + " instantiate error ");
                 }
             }
-            throw new BeanInstantiationException("the bean is not unique");
+            throw new MultipleBeanDefinition("the bean is not unique");
         }
     }
 }

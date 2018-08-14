@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class BeanContainer {
     private final static Map<String, BeanGenerator> beanMap = new HashMap<>();
-    private final static Map<Class<?>, ArrayList<String>> rBeanMap = new HashMap<>();
+    final static Map<Class<?>, ArrayList<String>> rBeanMap = new HashMap<>();
 
     public static void addBean(String beanName, Class<?> clazz, BeanGenerator beanGenerator) {
         beanMap.put(beanName, beanGenerator);
