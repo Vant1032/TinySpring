@@ -22,10 +22,11 @@ public class StringUtils {
         String beanName;
         if ("".equals(bean.value())) {
             beanName = StringUtils.firstCharLower(type.getSimpleName());
-            final String old = new String(beanName);
+            final String old = beanName;
             int i = 1;
             while (BeanContainer.nameExist(beanName)) {
                 beanName = old + i;
+                i++;
             }
         } else {
             beanName = bean.value();

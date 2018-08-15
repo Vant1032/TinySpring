@@ -211,6 +211,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
      */
     @NotNull
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T getBean(@NotNull Class<T> requireType) {
         if (requireType.isInterface() || Modifier.isAbstract(requireType.getModifiers())) {
             boolean unique = true;

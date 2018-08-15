@@ -6,7 +6,6 @@ import cc.vant.core.exception.BeanInstantiationException;
 import cc.vant.core.exception.NoSuchBeanDefinitionException;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -60,6 +59,7 @@ public class DefaultBeanGenerator implements BeanGenerator {
      *
      * @param beanFactory 用来处理bean之间的依赖关系
      */
+    @SuppressWarnings("unchecked")
     private Object generateNew(@NotNull BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         Object instance;
         if (constructor == null) {
