@@ -1,5 +1,7 @@
 package cc.vant.core.autowired.require;
 
+import cc.vant.core.autowired.require.r3.Watermelon;
+
 /**
  * @author Vant
  * @version 2018/8/15 下午 1:32

@@ -1,9 +1,10 @@
-package cc.vant.core.autowired.require;
+package cc.vant.core.autowired.require.r1;
 
 import cc.vant.core.annotations.Autowired;
 import cc.vant.core.annotations.Bean;
 import cc.vant.core.annotations.ComponentScan;
 import cc.vant.core.annotations.Configuration;
+import cc.vant.core.autowired.require.Banana;
 
 import java.util.Map;
 
@@ -20,11 +21,5 @@ public class SpringConfig {
         return new Banana();
     }
 
-    @Bean
-    @Autowired
-    public Lemon getLemon(Watermelon watermelon) {
-        final Lemon lemon = new Lemon();
-        lemon.setWatermelon(watermelon);
-        return lemon;
-    }
+
 }

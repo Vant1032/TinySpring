@@ -1,5 +1,7 @@
 package cc.vant.core;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Vant
  * @version 2018/8/14 上午 9:51
@@ -7,5 +9,5 @@ package cc.vant.core;
 public interface BeanFactory {
     Object getBean(String beanName);
 
-    <T> T getBean(Class<T> requireType);
+    @NotNull <T> T getBean(Class<T> requireType);
 }

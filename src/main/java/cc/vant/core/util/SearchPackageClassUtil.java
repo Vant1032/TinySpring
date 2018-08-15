@@ -1,5 +1,7 @@
 package cc.vant.core.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -22,7 +24,8 @@ public class SearchPackageClassUtil {
     /**
      * @return 包下的所有类名, 这些类名是互不重复的
      */
-    public static String[] searchPackageClass(String packageName) {
+    @NotNull
+    public static String[] searchPackageClass(@NotNull String packageName) {
         String packageDirName = packageName.replace('.', '/');
         Enumeration<URL> resources = null;
 
@@ -80,7 +83,7 @@ public class SearchPackageClassUtil {
     /**
      * 也许可以用多线程加速
      */
-    private static void searchByClass0(File file, String prefix, Set<String> result) {
+    private static void searchByClass0(@NotNull File file, String prefix, @NotNull Set<String> result) {
         File[] files = file.listFiles();
         for (File tmpFile : files) {
             if (tmpFile.getName().endsWith(".class")) {

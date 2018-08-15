@@ -1,5 +1,7 @@
 package cc.vant.core.annotations;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -16,5 +18,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Documented
 public @interface Scope {
-    ScopeType value() default ScopeType.Singleton;
+    @NotNull ScopeType value() default ScopeType.Singleton;
 }

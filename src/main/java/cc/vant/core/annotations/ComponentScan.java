@@ -1,5 +1,7 @@
 package cc.vant.core.annotations;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -14,5 +16,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Documented
 public @interface ComponentScan {
-    Class[] basePackageClasses();
+    @NotNull Class[] basePackageClasses();
 }

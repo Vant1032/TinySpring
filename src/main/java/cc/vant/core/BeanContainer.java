@@ -33,4 +33,8 @@ public class BeanContainer {
     public static ArrayList<String> getBeanNames(Class<?> clazz) {
         return rBeanMap.get(clazz);
     }
+
+    public static boolean nameExist(String name) {
+        return beanMap.containsKey(name);
+    }
 }

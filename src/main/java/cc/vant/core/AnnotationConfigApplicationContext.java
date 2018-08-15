@@ -13,6 +13,7 @@ import cc.vant.core.exception.NoSuchBeanDefinitionException;
 import cc.vant.core.exception.SpringInitException;
 import cc.vant.core.util.SearchPackageClassUtil;
 import cc.vant.core.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -26,6 +27,7 @@ import java.util.Set;
 
 /**
  * 添加了@Autowired接口和抽象类支持
+ *
  * @author Vant
  * @version 2018/8/3 上午 12:41
  */
@@ -33,7 +35,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
     /**
      * @param configs javaConfig类,用于配置TinySpring的类,该类必须用@Configuration注解
      */
-    public AnnotationConfigApplicationContext(Class<?>... configs) {
+    public AnnotationConfigApplicationContext(@NotNull Class<?>... configs) {
         Set<String> scannedPackage = new HashSet<>();
         for (Class<?> config : configs) {
             if (config.getAnnotation(Configuration.class) == null) {
@@ -52,11 +54,11 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
         }
     }
 
-    private void handleConfigBean(Class<?> config) {
+    private void handleConfigBean(@NotNull Class<?> config) {
         Object cfgInstance;
         try {
             cfgInstance = config.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (@NotNull InstantiationException | IllegalAccessException e) {
             throw new SpringInitException("can not instantiate " + config.getName(), e);
         }
         final Method[] methods = config.getDeclaredMethods();
@@ -66,12 +68,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
                 throw new SpringInitException(method.getName() + " should use @Autowired");
             }
             if (bean != null) {
-                String beanName;
-                if ("".equals(bean.value())) {
-                    beanName = StringUtils.firstCharLower(method.getReturnType().getSimpleName());
-                } else {
-                    beanName = bean.value();
-                }
+                String beanName = StringUtils.generateBeanName(bean, method.getReturnType());
                 final ConfigBeanGenerator generator = new ConfigBeanGenerator(cfgInstance, method);
                 final Scope scope = method.getAnnotation(Scope.class);
                 if (scope != null && scope.value() == ScopeType.Prototype) {
@@ -85,7 +82,8 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
     /**
      * @return 所有扫描到的类, 已经去重
      */
-    private Set<String> scanPackage(ComponentScan... componentScans) {
+    @NotNull
+    private Set<String> scanPackage(@NotNull ComponentScan... componentScans) {
         //由于包扫描会扫描子包,所以如果有子包存在,就删除,防止重复扫描,降低开销
         Set<String> packageNames = new HashSet<>();
         for (ComponentScan componentScan : componentScans) {
@@ -124,7 +122,8 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
     /**
      * @return className
      */
-    private Set<String> searchClass(String[] uniquePackage) {
+    @NotNull
+    private Set<String> searchClass(@NotNull String[] uniquePackage) {
         Set<String> packClass = new HashSet<>();
         for (String pac : uniquePackage) {
             String[] searchPackageClass = SearchPackageClassUtil.searchPackageClass(pac);
@@ -134,61 +133,56 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
     }
 
     private void handleScannedClass(String packageClass) {
+
+        Class<?> beanClass;
         try {
-            Class<?> beanClass = Class.forName(packageClass);
-
-            //处理bean
-            Bean beanAnnotation = beanClass.getAnnotation(Bean.class);
-            if (beanAnnotation == null) return;
-
-            String beanName;
-            if ("".equals(beanAnnotation.value())) {
-                final String simpleName = beanClass.getSimpleName();
-                beanName = StringUtils.firstCharLower(simpleName);
-            } else {
-                beanName = beanAnnotation.value();
-            }
-
-
-            //处理autowired
-            //Constructors(最多只能有一个Constructor可以autowired,否则报错)
-            DefaultBeanGenerator generator;
-            final Constructor<?>[] declaredConstructors = beanClass.getDeclaredConstructors();
-            boolean already = false;
-            Constructor<?> constructor = null;
-            for (Constructor<?> declaredConstructor : declaredConstructors) {
-                final Autowired autowired = declaredConstructor.getAnnotation(Autowired.class);
-                if (autowired != null) {
-                    if (already) {
-                        throw new SpringInitException(beanClass.getName() + " have multiple constructor");
-                    } else {
-                        constructor = declaredConstructor;
-                        already = true;
-                    }
-                }
-            }
-            if (constructor == null) {
-                generator = new DefaultBeanGenerator(beanClass);
-            } else {
-                generator = new DefaultBeanGenerator(constructor);
-            }
-            //fields
-            final Field[] declaredFields = beanClass.getDeclaredFields();
-            for (Field declaredField : declaredFields) {
-                final Autowired autowired = declaredField.getAnnotation(Autowired.class);
-                if (autowired == null) continue;
-                generator.addField(declaredField);
-            }
-
-            //scope
-            final Scope scope = beanClass.getAnnotation(Scope.class);
-            if (scope != null && scope.value() == ScopeType.Prototype) {
-                generator.setScopeType(ScopeType.Prototype);
-            }
-            BeanContainer.addBean(beanName, beanClass, generator);
-        } catch (Throwable e) {
+            beanClass = Class.forName(packageClass);
+        } catch (ClassNotFoundException e) {
             throw new SpringInitException(e);
         }
+
+        //处理bean
+        Bean beanAnnotation = beanClass.getAnnotation(Bean.class);
+        if (beanAnnotation == null) return;
+
+        String beanName = StringUtils.generateBeanName(beanAnnotation, beanClass);
+
+        //处理autowired
+        //Constructors(最多只能有一个Constructor可以autowired,否则报错)
+        DefaultBeanGenerator generator;
+        final Constructor<?>[] declaredConstructors = beanClass.getDeclaredConstructors();
+        boolean already = false;
+        Constructor<?> constructor = null;
+        for (Constructor<?> declaredConstructor : declaredConstructors) {
+            final Autowired autowired = declaredConstructor.getAnnotation(Autowired.class);
+            if (autowired != null) {
+                if (already) {
+                    throw new SpringInitException(beanClass.getName() + " have multiple constructor");
+                } else {
+                    constructor = declaredConstructor;
+                    already = true;
+                }
+            }
+        }
+        if (constructor == null) {
+            generator = new DefaultBeanGenerator(beanClass);
+        } else {
+            generator = new DefaultBeanGenerator(constructor);
+        }
+        //fields
+        final Field[] declaredFields = beanClass.getDeclaredFields();
+        for (Field declaredField : declaredFields) {
+            final Autowired autowired = declaredField.getAnnotation(Autowired.class);
+            if (autowired == null) continue;
+            generator.addField(declaredField);
+        }
+
+        //scope
+        final Scope scope = beanClass.getAnnotation(Scope.class);
+        if (scope != null && scope.value() == ScopeType.Prototype) {
+            generator.setScopeType(ScopeType.Prototype);
+        }
+        BeanContainer.addBean(beanName, beanClass, generator);
     }
 
 
@@ -204,18 +198,20 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
 
         try {
             return generator.generate(this);
-        } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (@NotNull IllegalAccessException | InvocationTargetException | InstantiationException e) {
             throw new BeanInstantiationException(e);
         }
     }
 
     /**
      * 遇到抽象类或接口时会遍历所有bean以找到子类
+     *
      * @return 若没有找到则抛异常
      * @throws cc.vant.core.exception.MultipleBeanDefinition 若找到多个匹配项
      */
+    @NotNull
     @Override
-    public <T> T getBean(Class<T> requireType) {
+    public <T> T getBean(@NotNull Class<T> requireType) {
         if (requireType.isInterface() || Modifier.isAbstract(requireType.getModifiers())) {
             boolean unique = true;
             Object beanInstance = null;
@@ -241,7 +237,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
             if (beanNames.size() == 1) {
                 try {
                     return (T) BeanContainer.getGenerator(beanNames.get(0)).generate(this);
-                } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+                } catch (@NotNull IllegalAccessException | InvocationTargetException | InstantiationException e) {
                     throw new BeanInstantiationException(beanNames.get(0) + " instantiate error ");
                 }
             }

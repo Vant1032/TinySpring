@@ -4,6 +4,7 @@ import cc.vant.core.annotations.Autowired;
 import cc.vant.core.annotations.ScopeType;
 import cc.vant.core.exception.BeanInstantiationException;
 import cc.vant.core.exception.NoSuchBeanDefinitionException;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 public class DefaultBeanGenerator implements BeanGenerator {
     private Constructor<?> constructor;
     private Class<?> clazz;
+    @NotNull
     private ArrayList<Field> fields = new ArrayList<>();
     private ScopeType scopeType = ScopeType.Singleton;
     private Object beanInstance;
@@ -43,7 +45,7 @@ public class DefaultBeanGenerator implements BeanGenerator {
     }
 
     @Override
-    public Object generate(BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+    public Object generate(@NotNull BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         if (scopeType == ScopeType.Singleton) {
             if (beanInstance == null) {
                 beanInstance = generateNew(beanFactory);
@@ -58,7 +60,7 @@ public class DefaultBeanGenerator implements BeanGenerator {
      *
      * @param beanFactory 用来处理bean之间的依赖关系
      */
-    private Object generateNew(BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+    private Object generateNew(@NotNull BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         Object instance;
         if (constructor == null) {
             instance = clazz.newInstance();
@@ -76,7 +78,7 @@ public class DefaultBeanGenerator implements BeanGenerator {
                     for (int i = 0; i < parameterTypes.length; i++) {
                         try {
                             objects[i] = beanFactory.getBean(parameterTypes[i]);
-                        } catch (NoSuchBeanDefinitionException | BeanInstantiationException e) {
+                        } catch (@NotNull NoSuchBeanDefinitionException | BeanInstantiationException e) {
                             objects[i] = null;
                         }
                     }
@@ -97,7 +99,7 @@ public class DefaultBeanGenerator implements BeanGenerator {
             } else {
                 try {
                     bean = beanFactory.getBean(field.getType());
-                } catch (NoSuchBeanDefinitionException | BeanInstantiationException e) {
+                } catch (@NotNull NoSuchBeanDefinitionException | BeanInstantiationException e) {
                     bean = null;
                 }
             }

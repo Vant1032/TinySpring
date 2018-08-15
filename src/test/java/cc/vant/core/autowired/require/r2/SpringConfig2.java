@@ -1,9 +1,10 @@
-package cc.vant.core.autowired.require;
+package cc.vant.core.autowired.require.r2;
 
 import cc.vant.core.annotations.Autowired;
 import cc.vant.core.annotations.Bean;
 import cc.vant.core.annotations.ComponentScan;
 import cc.vant.core.annotations.Configuration;
+import cc.vant.core.autowired.require.Banana;
 
 import java.util.Map;
 
@@ -12,7 +13,7 @@ import java.util.Map;
  * @version 2018/8/15 下午 1:46
  */
 @Configuration
-@ComponentScan(basePackageClasses = {cc.vant.core.autowired.require.SpringConfig.class})
+@ComponentScan(basePackageClasses = {SpringConfig2.class})
 public class SpringConfig2 {
 
     @Bean

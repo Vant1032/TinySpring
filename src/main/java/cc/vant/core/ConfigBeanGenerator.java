@@ -4,6 +4,7 @@ import cc.vant.core.annotations.Autowired;
 import cc.vant.core.annotations.ScopeType;
 import cc.vant.core.exception.BeanInstantiationException;
 import cc.vant.core.exception.NoSuchBeanDefinitionException;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -29,7 +30,7 @@ public class ConfigBeanGenerator implements BeanGenerator {
     }
 
     @Override
-    public Object generate(BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException {
+    public Object generate(@NotNull BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException {
         if (scopeType == ScopeType.Singleton) {
             if (beanInstance == null) {
                 beanInstance = generateNew(beanFactory);
@@ -39,7 +40,7 @@ public class ConfigBeanGenerator implements BeanGenerator {
         return generateNew(beanFactory);
     }
 
-    public Object generateNew(BeanFactory beanFactory) throws InvocationTargetException, IllegalAccessException {
+    public Object generateNew(@NotNull BeanFactory beanFactory) throws InvocationTargetException, IllegalAccessException {
         final Class<?>[] parameterTypes = method.getParameterTypes();
         Object[] args = new Object[parameterTypes.length];
         if (parameterTypes.length > 0) {
@@ -51,7 +52,7 @@ public class ConfigBeanGenerator implements BeanGenerator {
                 for (int i = 0; i < parameterTypes.length; i++) {
                     try {
                         args[i] = beanFactory.getBean(parameterTypes[i]);
-                    } catch (NoSuchBeanDefinitionException | BeanInstantiationException e) {
+                    } catch (@NotNull NoSuchBeanDefinitionException | BeanInstantiationException e) {
                         args[i] = null;
                     }
                 }
