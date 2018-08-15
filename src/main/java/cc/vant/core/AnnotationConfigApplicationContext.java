@@ -62,6 +62,9 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
         final Method[] methods = config.getDeclaredMethods();
         for (Method method : methods) {
             final Bean bean = method.getAnnotation(Bean.class);
+            if (method.getParameterCount() > 0 && method.getAnnotation(Autowired.class) == null) {
+                throw new SpringInitException(method.getName() + " should use @Autowired");
+            }
             if (bean != null) {
                 String beanName;
                 if ("".equals(bean.value())) {
@@ -233,7 +236,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
         }
         final ArrayList<String> beanNames = BeanContainer.getBeanNames(requireType);
         if (beanNames == null) {
-            throw new NoSuchBeanDefinitionException();
+            throw new NoSuchBeanDefinitionException(requireType.getName());
         } else {
             if (beanNames.size() == 1) {
                 try {

@@ -4,6 +4,8 @@ import cc.vant.core.AnnotationConfigApplicationContext;
 import cc.vant.core.autowired.constructor.Pear;
 import cc.vant.core.autowired.constructor.SpringConfigConstructor;
 import cc.vant.core.autowired.onconfiguration.KiwiFruit;
+import cc.vant.core.autowired.require.Banana;
+import cc.vant.core.autowired.require.Lemon;
 import cc.vant.core.exception.NoSuchBeanDefinitionException;
 import cc.vant.core.notexist.CauseWrong;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -59,5 +62,23 @@ public class SpringTest {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(cc.vant.core.autowired.onconfiguration.SpringConfig.class);
         final KiwiFruit kiwiFruit = (KiwiFruit) context.getBean("kiwiFruit");
         assertEquals(kiwiFruit.getWeight(), 1000);
+    }
+
+    @Test
+    @DisplayName("require属性测试")
+    void require() {
+        assertThrows(NoSuchBeanDefinitionException.class, () -> {
+            AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(cc.vant.core.autowired.require.SpringConfig.class);
+            final Banana banana = (Banana) context.getBean("banana");
+        });
+
+        AnnotationConfigApplicationContext context2 = new AnnotationConfigApplicationContext(cc.vant.core.autowired.require.SpringConfig2.class);
+        final Banana banana = (Banana) context2.getBean("banana");
+        assertNull(banana.getMap());
+
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(cc.vant.core.autowired.require.SpringConfig.class);
+        final Lemon lemon = (Lemon) context.getBean("lemon");
+        assertNotNull(lemon.getWatermelon());
+
     }
 }

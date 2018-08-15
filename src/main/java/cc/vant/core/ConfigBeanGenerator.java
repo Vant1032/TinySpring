@@ -1,6 +1,9 @@
 package cc.vant.core;
 
+import cc.vant.core.annotations.Autowired;
 import cc.vant.core.annotations.ScopeType;
+import cc.vant.core.exception.BeanInstantiationException;
+import cc.vant.core.exception.NoSuchBeanDefinitionException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -39,8 +42,20 @@ public class ConfigBeanGenerator implements BeanGenerator {
     public Object generateNew(BeanFactory beanFactory) throws InvocationTargetException, IllegalAccessException {
         final Class<?>[] parameterTypes = method.getParameterTypes();
         Object[] args = new Object[parameterTypes.length];
-        for (int i = 0; i < parameterTypes.length; i++) {
-            args[i] = beanFactory.getBean(parameterTypes[i]);
+        if (parameterTypes.length > 0) {
+            if (method.getAnnotation(Autowired.class).required()) {
+                for (int i = 0; i < parameterTypes.length; i++) {
+                    args[i] = beanFactory.getBean(parameterTypes[i]);
+                }
+            } else {
+                for (int i = 0; i < parameterTypes.length; i++) {
+                    try {
+                        args[i] = beanFactory.getBean(parameterTypes[i]);
+                    } catch (NoSuchBeanDefinitionException | BeanInstantiationException e) {
+                        args[i] = null;
+                    }
+                }
+            }
         }
         if (!method.isAccessible()) {
             method.setAccessible(true);

@@ -1,7 +1,11 @@
 package cc.vant.core;
 
+import cc.vant.core.annotations.Autowired;
 import cc.vant.core.annotations.ScopeType;
+import cc.vant.core.exception.BeanInstantiationException;
+import cc.vant.core.exception.NoSuchBeanDefinitionException;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -60,10 +64,25 @@ public class DefaultBeanGenerator implements BeanGenerator {
             instance = clazz.newInstance();
         } else {
             final Class[] parameterTypes = constructor.getParameterTypes();
+            final Autowired autowired = constructor.getAnnotation(Autowired.class);
             Object[] objects = new Object[parameterTypes.length];
-            for (int i = 0; i < parameterTypes.length; i++) {
-                objects[i] = beanFactory.getBean(parameterTypes[i]);
+            //对@Autowired require属性的支持
+            if (parameterTypes.length > 0) {
+                if (autowired.required()) {
+                    for (int i = 0; i < parameterTypes.length; i++) {
+                        objects[i] = beanFactory.getBean(parameterTypes[i]);
+                    }
+                } else {
+                    for (int i = 0; i < parameterTypes.length; i++) {
+                        try {
+                            objects[i] = beanFactory.getBean(parameterTypes[i]);
+                        } catch (NoSuchBeanDefinitionException | BeanInstantiationException e) {
+                            objects[i] = null;
+                        }
+                    }
+                }
             }
+
             instance = constructor.newInstance(objects);
         }
 
@@ -72,7 +91,17 @@ public class DefaultBeanGenerator implements BeanGenerator {
             if (!field.isAccessible()) {
                 field.setAccessible(true);
             }
-            field.set(instance, beanFactory.getBean(field.getType()));
+            Object bean;
+            if (field.getAnnotation(Autowired.class).required()) {
+                bean = beanFactory.getBean(field.getType());
+            } else {
+                try {
+                    bean = beanFactory.getBean(field.getType());
+                } catch (NoSuchBeanDefinitionException | BeanInstantiationException e) {
+                    bean = null;
+                }
+            }
+            field.set(instance, bean);
         }
         return instance;
     }
