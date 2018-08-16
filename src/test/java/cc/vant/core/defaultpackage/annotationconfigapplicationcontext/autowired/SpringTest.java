@@ -6,6 +6,7 @@ import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.onconfiguration.KiwiFruit;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.require.Banana;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.require.Lemon;
+import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.require.r2.Cake;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.require.r2.SpringConfig2;
 import cc.vant.core.exception.NoSuchBeanDefinitionException;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.notexist.CauseWrong;
@@ -78,8 +79,8 @@ public class SpringTest {
     @DisplayName("require属性测试")
     void require2() {
         AnnotationConfigApplicationContext context2 = new AnnotationConfigApplicationContext(SpringConfig2.class);
-        final Banana banana = (Banana) context2.getBean("banana");
-        assertNull(banana.getMap());
+        final Cake cake = (Cake) context2.getBean("cake");
+        assertNull(cake.getMap());
     }
 
     @Test
