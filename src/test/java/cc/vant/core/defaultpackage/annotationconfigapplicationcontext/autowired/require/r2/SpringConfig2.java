@@ -4,7 +4,6 @@ import cc.vant.core.annotations.Autowired;
 import cc.vant.core.annotations.Bean;
 import cc.vant.core.annotations.ComponentScan;
 import cc.vant.core.annotations.Configuration;
-import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.require.Banana;
 
 import java.util.Map;
 
@@ -18,9 +17,9 @@ public class SpringConfig2 {
 
     @Bean
     @Autowired(required = false)
-    public Banana getBanana(Map map) {
-        final Banana banana = new Banana();
-        banana.setMap(map);
-        return banana;
+    public Cake getCake(Map map) {
+        final Cake cake = new Cake();
+        cake.setMap(map);
+        return cake;
     }
 }

@@ -4,6 +4,9 @@ import cc.vant.core.AnnotationConfigApplicationContext;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.constructor.Pear;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.constructor.SpringConfigConstructor;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.onconfiguration.KiwiFruit;
+import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.require.Banana;
+import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.require.Lemon;
+import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.require.r2.SpringConfig2;
 import cc.vant.core.exception.NoSuchBeanDefinitionException;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.notexist.CauseWrong;
 import org.junit.jupiter.api.DisplayName;
@@ -37,13 +40,13 @@ public class SpringTest {
         });
     }
 
-//    @Test
-//    @DisplayName("Autowired作用于构造器上")
-//    void testAutowiredConstructor() {
-//        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigConstructor.class);
-//        final Pear pear = context.getBean(Pear.class);
-//        assertNotNull(pear.getApple());
-//    }
+    @Test
+    @DisplayName("Autowired作用于构造器上")
+    void testAutowiredConstructor() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigConstructor.class);
+        final Pear pear = context.getBean(Pear.class);
+        assertNotNull(pear.getApple());
+    }
 
     @Test
     @DisplayName("单例模式")
@@ -62,28 +65,28 @@ public class SpringTest {
         assertEquals(kiwiFruit.getWeight(), 1000);
     }
 
-//    @Test
-//    @DisplayName("require属性测试")
-//    void require1() {
-//        assertThrows(NoSuchBeanDefinitionException.class, () -> {
-//            AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.require.r1.SpringConfig.class);
-//            final Banana banana = (Banana) context.getBean("banana");
-//        });
-//    }
-//
-//    @Test
-//    @DisplayName("require属性测试")
-//    void require2() {
-//        AnnotationConfigApplicationContext context2 = new AnnotationConfigApplicationContext(SpringConfig2.class);
-//        final Banana banana = (Banana) context2.getBean("banana");
-//        assertNull(banana.getMap());
-//    }
-//
-//    @Test
-//    @DisplayName("require属性测试")
-//    void require3() {
-//        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.require.r3.SpringConfig3.class);
-//        final Lemon lemon = (Lemon) context.getBean("lemon");
-//        assertNotNull(lemon.getWatermelon());
-//    }
+    @Test
+    @DisplayName("require属性测试")
+    void require1() {
+        assertThrows(NoSuchBeanDefinitionException.class, () -> {
+            AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.require.r1.SpringConfig.class);
+            final Banana banana = (Banana) context.getBean("banana");
+        });
+    }
+
+    @Test
+    @DisplayName("require属性测试")
+    void require2() {
+        AnnotationConfigApplicationContext context2 = new AnnotationConfigApplicationContext(SpringConfig2.class);
+        final Banana banana = (Banana) context2.getBean("banana");
+        assertNull(banana.getMap());
+    }
+
+    @Test
+    @DisplayName("require属性测试")
+    void require3() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.require.r3.SpringConfig3.class);
+        final Lemon lemon = (Lemon) context.getBean("lemon");
+        assertNotNull(lemon.getWatermelon());
+    }
 }
