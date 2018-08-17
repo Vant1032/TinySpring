@@ -6,6 +6,7 @@ cache:
   directories:
   - '$HOME/.m2/repository'
 
+script: "mvn test"
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
