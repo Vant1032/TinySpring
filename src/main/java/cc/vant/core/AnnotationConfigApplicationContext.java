@@ -31,7 +31,7 @@ import java.util.Set;
  * @author Vant
  * @version 2018/8/3 上午 12:41
  */
-public class AnnotationConfigApplicationContext implements BeanFactory {
+public class AnnotationConfigApplicationContext implements BeanFactory, AutoCloseable {
     /**
      * @param configs javaConfig类,用于配置TinySpring的类,该类必须用@Configuration注解
      */
@@ -244,5 +244,11 @@ public class AnnotationConfigApplicationContext implements BeanFactory {
             }
             throw new MultipleBeanDefinition("the bean is not unique");
         }
+    }
+
+
+    @Override
+    public void close() throws Exception {
+
     }
 }

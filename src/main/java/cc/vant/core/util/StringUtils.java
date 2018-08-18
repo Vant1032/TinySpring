@@ -1,6 +1,7 @@
 package cc.vant.core.util;
 
 import cc.vant.core.BeanContainer;
+import cc.vant.core.annotations.Autowired;
 import cc.vant.core.annotations.Bean;
 import cc.vant.core.exception.BeanInstantiationException;
 import org.jetbrains.annotations.NotNull;
