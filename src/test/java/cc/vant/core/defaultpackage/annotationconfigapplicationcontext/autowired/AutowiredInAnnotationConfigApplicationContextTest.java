@@ -1,7 +1,6 @@
 package cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired;
 
 import cc.vant.core.AnnotationConfigApplicationContext;
-import cc.vant.core.BeanContainer;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.constructor.Pear;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.constructor.SpringConfigConstructor;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.onconfiguration.KiwiFruit;
@@ -9,8 +8,8 @@ import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.require.Lemon;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.require.r2.Cake;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.require.r2.SpringConfig2;
-import cc.vant.core.exception.NoSuchBeanDefinitionException;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.notexist.CauseWrong;
+import cc.vant.core.exception.NoSuchBeanDefinitionException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

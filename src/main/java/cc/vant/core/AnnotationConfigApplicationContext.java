@@ -32,6 +32,7 @@ import java.util.Set;
  * @version 2018/8/3 上午 12:41
  */
 public class AnnotationConfigApplicationContext implements BeanFactory, AutoCloseable {
+    @NotNull
     private BeanContainer beanContainer = new BeanContainer();
 
     /**
@@ -218,7 +219,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         if (requireType.isInterface() || Modifier.isAbstract(requireType.getModifiers())) {
             boolean unique = true;
             Object beanInstance = null;
-            for (Class<?> beanClass : beanContainer.rBeanMap.keySet()) {
+            for (Class<?> beanClass : beanContainer.getClasses()) {
                 if (requireType.isAssignableFrom(beanClass)) {
                     if (unique) {
                         unique = false;

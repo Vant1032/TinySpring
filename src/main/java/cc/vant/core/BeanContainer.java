@@ -3,6 +3,7 @@ package cc.vant.core;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Vant
@@ -10,7 +11,7 @@ import java.util.Map;
  */
 public class BeanContainer implements AutoCloseable {
     private final Map<String, BeanGenerator> beanMap = new HashMap<>();
-    final Map<Class<?>, ArrayList<String>> rBeanMap = new HashMap<>();
+    private final Map<Class<?>, ArrayList<String>> rBeanMap = new HashMap<>();
 
     public void addBean(String beanName, Class<?> clazz, BeanGenerator beanGenerator) {
         beanMap.put(beanName, beanGenerator);
@@ -40,6 +41,10 @@ public class BeanContainer implements AutoCloseable {
         return rBeanMap.get(clazz);
     }
 
+    public Set<Class<?>> getClasses() {
+        return rBeanMap.keySet();
+    }
+
     public boolean nameExist(String name) {
         return beanMap.containsKey(name);
     }
@@ -48,7 +53,6 @@ public class BeanContainer implements AutoCloseable {
         beanMap.clear();
         rBeanMap.clear();
     }
-
 
     @Override
     public void close() throws Exception {

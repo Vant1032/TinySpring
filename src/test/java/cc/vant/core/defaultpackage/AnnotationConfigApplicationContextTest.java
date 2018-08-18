@@ -1,13 +1,13 @@
 package cc.vant.core.defaultpackage;
 
 import cc.vant.core.AnnotationConfigApplicationContext;
-import cc.vant.core.exception.SpringInitException;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.getbean.AFather;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.getbean.IFather;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.getbean.SpringConfig;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.multiconfig.SpringConfig1;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.multiconfig.SpringConfig2;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.multiconfig.SpringConfig3;
+import cc.vant.core.exception.SpringInitException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;

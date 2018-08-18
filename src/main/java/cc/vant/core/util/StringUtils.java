@@ -1,7 +1,6 @@
 package cc.vant.core.util;
 
 import cc.vant.core.BeanContainer;
-import cc.vant.core.annotations.Autowired;
 import cc.vant.core.annotations.Bean;
 import cc.vant.core.exception.BeanInstantiationException;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +18,7 @@ public class StringUtils {
         return String.valueOf(buf);
     }
 
-    public static String generateBeanName(BeanContainer beanContainer, @NotNull Bean bean, @NotNull Class<?> type) {
+    public static String generateBeanName(@NotNull BeanContainer beanContainer, @NotNull Bean bean, @NotNull Class<?> type) {
         String beanName;
         if ("".equals(bean.value())) {
             beanName = StringUtils.firstCharLower(type.getSimpleName());
