@@ -19,19 +19,19 @@ public class StringUtils {
         return String.valueOf(buf);
     }
 
-    public static String generateBeanName(@NotNull Bean bean, @NotNull Class<?> type) {
+    public static String generateBeanName(BeanContainer beanContainer, @NotNull Bean bean, @NotNull Class<?> type) {
         String beanName;
         if ("".equals(bean.value())) {
             beanName = StringUtils.firstCharLower(type.getSimpleName());
             final String old = beanName;
             int i = 1;
-            while (BeanContainer.nameExist(beanName)) {
+            while (beanContainer.nameExist(beanName)) {
                 beanName = old + i;
                 i++;
             }
         } else {
             beanName = bean.value();
-            if (BeanContainer.nameExist(beanName)) {
+            if (beanContainer.nameExist(beanName)) {
                 throw new BeanInstantiationException("the name " + beanName + " is already exist ");
             }
         }

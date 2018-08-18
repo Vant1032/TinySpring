@@ -1,6 +1,7 @@
 package cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired;
 
 import cc.vant.core.AnnotationConfigApplicationContext;
+import cc.vant.core.BeanContainer;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.constructor.Pear;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.constructor.SpringConfigConstructor;
 import cc.vant.core.defaultpackage.annotationconfigapplicationcontext.autowired.onconfiguration.KiwiFruit;
@@ -56,6 +57,7 @@ public class AutowiredInAnnotationConfigApplicationContextTest {
         final Pear pear = context.getBean(Pear.class);
         final Pear pear1 = context.getBean(Pear.class);
         assertSame(pear, pear1);
+
     }
 
     @Test

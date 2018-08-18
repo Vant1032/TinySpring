@@ -32,6 +32,8 @@ import java.util.Set;
  * @version 2018/8/3 上午 12:41
  */
 public class AnnotationConfigApplicationContext implements BeanFactory, AutoCloseable {
+    private BeanContainer beanContainer = new BeanContainer();
+
     /**
      * @param configs javaConfig类,用于配置TinySpring的类,该类必须用@Configuration注解
      */
@@ -68,13 +70,13 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
                 throw new SpringInitException(method.getName() + " should use @Autowired");
             }
             if (bean != null) {
-                String beanName = StringUtils.generateBeanName(bean, method.getReturnType());
+                String beanName = StringUtils.generateBeanName(beanContainer, bean, method.getReturnType());
                 final ConfigBeanGenerator generator = new ConfigBeanGenerator(cfgInstance, method);
                 final Scope scope = method.getAnnotation(Scope.class);
                 if (scope != null && scope.value() == ScopeType.Prototype) {
                     generator.setScopeType(ScopeType.Prototype);
                 }
-                BeanContainer.addBean(beanName, method.getReturnType(), generator);
+                beanContainer.addBean(beanName, method.getReturnType(), generator);
             }
         }
     }
@@ -145,7 +147,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         Bean beanAnnotation = beanClass.getAnnotation(Bean.class);
         if (beanAnnotation == null) return;
 
-        String beanName = StringUtils.generateBeanName(beanAnnotation, beanClass);
+        String beanName = StringUtils.generateBeanName(beanContainer, beanAnnotation, beanClass);
 
         //处理autowired
         //Constructors(最多只能有一个Constructor可以autowired,否则报错)
@@ -182,7 +184,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         if (scope != null && scope.value() == ScopeType.Prototype) {
             generator.setScopeType(ScopeType.Prototype);
         }
-        BeanContainer.addBean(beanName, beanClass, generator);
+        beanContainer.addBean(beanName, beanClass, generator);
     }
 
 
@@ -191,7 +193,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
      */
     @Override
     public Object getBean(String beanName) {
-        final BeanGenerator generator = BeanContainer.getGenerator(beanName);
+        final BeanGenerator generator = beanContainer.getGenerator(beanName);
         if (generator == null) {
             throw new NoSuchBeanDefinitionException();
         }
@@ -216,7 +218,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         if (requireType.isInterface() || Modifier.isAbstract(requireType.getModifiers())) {
             boolean unique = true;
             Object beanInstance = null;
-            for (Class<?> beanClass : BeanContainer.rBeanMap.keySet()) {
+            for (Class<?> beanClass : beanContainer.rBeanMap.keySet()) {
                 if (requireType.isAssignableFrom(beanClass)) {
                     if (unique) {
                         unique = false;
@@ -231,13 +233,13 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
             }
             return (T) beanInstance;
         }
-        final ArrayList<String> beanNames = BeanContainer.getBeanNames(requireType);
+        final ArrayList<String> beanNames = beanContainer.getBeanNames(requireType);
         if (beanNames == null) {
             throw new NoSuchBeanDefinitionException(requireType.getName());
         } else {
             if (beanNames.size() == 1) {
                 try {
-                    return (T) BeanContainer.getGenerator(beanNames.get(0)).generate(this);
+                    return (T) beanContainer.getGenerator(beanNames.get(0)).generate(this);
                 } catch (@NotNull IllegalAccessException | InvocationTargetException | InstantiationException e) {
                     throw new BeanInstantiationException(beanNames.get(0) + " instantiate error ");
                 }
@@ -246,9 +248,12 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         }
     }
 
+    public ArrayList<String> getBeanNames(Class<?> clazz) {
+        return beanContainer.getBeanNames(clazz);
+    }
 
     @Override
     public void close() throws Exception {
-
+        beanContainer.clear();
     }
 }
