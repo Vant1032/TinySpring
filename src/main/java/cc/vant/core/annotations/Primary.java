@@ -2,18 +2,16 @@ package cc.vant.core.annotations;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
  * @author Vant
- * @version 2018/8/19 上午 12:32
+ * @version 2018/8/22 下午 7:41
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Documented
-public @interface Qualifier {
-    String value();
+public @interface Primary {
 }

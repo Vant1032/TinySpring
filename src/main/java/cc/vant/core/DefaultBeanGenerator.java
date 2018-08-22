@@ -24,23 +24,28 @@ public class DefaultBeanGenerator implements BeanGenerator {
     private ArrayList<Field> fields = new ArrayList<>();
     private ScopeType scopeType = ScopeType.Singleton;
     private Object beanInstance;
+    private BeanDefinition beanDefinition;
 
-    public DefaultBeanGenerator(Class<?> clazz) {
+    public DefaultBeanGenerator(Class<?> clazz, BeanDefinition beanDefinition) {
         this.clazz = clazz;
+        this.beanDefinition = beanDefinition;
     }
 
-    public DefaultBeanGenerator(Constructor<?> constructor) {
+    public DefaultBeanGenerator(Constructor<?> constructor, BeanDefinition beanDefinition) {
         this.constructor = constructor;
+        this.beanDefinition = beanDefinition;
     }
 
-    public DefaultBeanGenerator(Constructor<?> constructor, Field field) {
+    public DefaultBeanGenerator(Constructor<?> constructor, Field field, BeanDefinition beanDefinition) {
         this.constructor = constructor;
         fields.add(field);
+        this.beanDefinition = beanDefinition;
     }
 
-    public DefaultBeanGenerator(Class<?> clazz, Field field) {
+    public DefaultBeanGenerator(Class<?> clazz, Field field, BeanDefinition beanDefinition) {
         this.clazz = clazz;
         fields.add(field);
+        this.beanDefinition = beanDefinition;
     }
 
     @Override
@@ -126,5 +131,13 @@ public class DefaultBeanGenerator implements BeanGenerator {
 
     public void setScopeType(ScopeType scopeType) {
         this.scopeType = scopeType;
+    }
+
+    public BeanDefinition getBeanDefinition() {
+        return beanDefinition;
+    }
+
+    public void setBeanDefinition(BeanDefinition beanDefinition) {
+        this.beanDefinition = beanDefinition;
     }
 }

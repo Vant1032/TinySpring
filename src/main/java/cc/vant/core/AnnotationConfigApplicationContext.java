@@ -5,6 +5,8 @@ import cc.vant.core.annotations.Autowired;
 import cc.vant.core.annotations.Bean;
 import cc.vant.core.annotations.ComponentScan;
 import cc.vant.core.annotations.Configuration;
+import cc.vant.core.annotations.Primary;
+import cc.vant.core.annotations.Qualifier;
 import cc.vant.core.annotations.Scope;
 import cc.vant.core.annotations.ScopeType;
 import cc.vant.core.exception.BeanInstantiationException;
@@ -15,6 +17,7 @@ import cc.vant.core.util.SearchPackageClassUtil;
 import cc.vant.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -71,13 +74,35 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
                 throw new SpringInitException(method.getName() + " should use @Autowired");
             }
             if (bean != null) {
+                final BeanDefinitionImpl beanDefinition = new BeanDefinitionImpl();
+                final ConfigBeanGenerator generator = new ConfigBeanGenerator(cfgInstance, method, beanDefinition);
                 String beanName = StringUtils.generateBeanName(beanContainer, bean, method.getReturnType());
-                final ConfigBeanGenerator generator = new ConfigBeanGenerator(cfgInstance, method);
                 final Scope scope = method.getAnnotation(Scope.class);
+                final ScopeType scopeType;
                 if (scope != null && scope.value() == ScopeType.Prototype) {
-                    generator.setScopeType(ScopeType.Prototype);
+                    scopeType = ScopeType.Prototype;
+                    generator.setScopeType(scopeType);
+                } else {
+                    scopeType = ScopeType.Singleton;
                 }
-                beanContainer.addBean(beanName, method.getReturnType(), generator);
+                beanDefinition.setBeanName(beanName);
+                final Primary primary = method.getAnnotation(Primary.class);
+                beanDefinition.setPrimary(primary != null);
+                final Annotation[] annotations = method.getAnnotations();
+
+                final ArrayList<Annotation> qualifiers = new ArrayList<>();
+                beanDefinition.setQualifiers(qualifiers);
+                for (Annotation annotation : annotations) {
+                    if (annotation instanceof Qualifier) {
+                        Qualifier qualifier = (Qualifier) annotation;
+                        beanDefinition.setQualifierString(qualifier.value());
+                    } else if (annotation.getClass().getAnnotation(Qualifier.class) != null) {
+                        qualifiers.add(annotation);
+                    }
+                }
+                beanDefinition.setScopeType(scopeType);
+                beanDefinition.setType(method.getReturnType());
+                beanContainer.addBean(beanName, method.getReturnType(), beanDefinition, generator);
             }
         }
     }
@@ -167,10 +192,11 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
                 }
             }
         }
+        final BeanDefinitionImpl beanDefinition = new BeanDefinitionImpl();
         if (constructor == null) {
-            generator = new DefaultBeanGenerator(beanClass);
+            generator = new DefaultBeanGenerator(beanClass, beanDefinition);
         } else {
-            generator = new DefaultBeanGenerator(constructor);
+            generator = new DefaultBeanGenerator(constructor, beanDefinition);
         }
         //fields
         final Field[] declaredFields = beanClass.getDeclaredFields();
@@ -184,8 +210,24 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         final Scope scope = beanClass.getAnnotation(Scope.class);
         if (scope != null && scope.value() == ScopeType.Prototype) {
             generator.setScopeType(ScopeType.Prototype);
+            beanDefinition.setScopeType(ScopeType.Prototype);
         }
-        beanContainer.addBean(beanName, beanClass, generator);
+        beanDefinition.setBeanName(beanName);
+        beanDefinition.setType(beanClass);
+        beanDefinition.setPrimary(beanClass.getAnnotation(Primary.class) != null);
+        final ArrayList<Annotation> qualifiers = new ArrayList<>();
+        beanDefinition.setQualifiers(qualifiers);
+
+        final Annotation[] annotations = beanClass.getAnnotations();
+        for (Annotation annotation : annotations) {
+            if (annotation instanceof Qualifier) {
+                Qualifier qualifier = (Qualifier) annotation;
+                beanDefinition.setQualifierString(qualifier.value());
+            } else if (annotation.getClass().getAnnotation(Qualifier.class) != null) {
+                qualifiers.add(annotation);
+            }
+        }
+        beanContainer.addBean(beanName, beanClass, beanDefinition, generator);
     }
 
 

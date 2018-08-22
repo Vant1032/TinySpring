@@ -1,5 +1,7 @@
 package cc.vant.core;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,10 +13,12 @@ import java.util.Set;
  */
 public class BeanContainer implements AutoCloseable {
     private final Map<String, BeanGenerator> beanMap = new HashMap<>();
+    private final Map<String, BeanDefinition> definitionMap = new HashMap<>();
     private final Map<Class<?>, ArrayList<String>> rBeanMap = new HashMap<>();
 
-    public void addBean(String beanName, Class<?> clazz, BeanGenerator beanGenerator) {
+    public void addBean(@NotNull String beanName, Class<?> clazz, BeanDefinition beanDefinition, BeanGenerator beanGenerator) {
         beanMap.put(beanName, beanGenerator);
+        definitionMap.put(beanName, beanDefinition);
         final ArrayList<String> beanNames = rBeanMap.get(clazz);
         if (beanNames == null) {
             final ArrayList<String> arrayList = new ArrayList<>(1);
@@ -49,9 +53,12 @@ public class BeanContainer implements AutoCloseable {
         return beanMap.containsKey(name);
     }
 
+
+
     public void clear() {
         beanMap.clear();
         rBeanMap.clear();
+        definitionMap.clear();
     }
 
     @Override

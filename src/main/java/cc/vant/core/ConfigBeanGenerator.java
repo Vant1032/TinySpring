@@ -20,13 +20,15 @@ public class ConfigBeanGenerator implements BeanGenerator {
     private Method method;
     private ScopeType scopeType = ScopeType.Singleton;
     private Object beanInstance;
+    private BeanDefinition beanDefinition;
 
     /**
      * @param method 如果method有参数,必须保证method被@autowired注解
      */
-    public ConfigBeanGenerator(Object configInstance, Method method) {
+    public ConfigBeanGenerator(Object configInstance, Method method, BeanDefinition beanDefinition) {
         this.configInstance = configInstance;
         this.method = method;
+        this.beanDefinition = beanDefinition;
     }
 
     @Override
@@ -70,5 +72,13 @@ public class ConfigBeanGenerator implements BeanGenerator {
 
     public void setScopeType(ScopeType scopeType) {
         this.scopeType = scopeType;
+    }
+
+    public BeanDefinition getBeanDefinition() {
+        return beanDefinition;
+    }
+
+    public void setBeanDefinition(BeanDefinition beanDefinition) {
+        this.beanDefinition = beanDefinition;
     }
 }
