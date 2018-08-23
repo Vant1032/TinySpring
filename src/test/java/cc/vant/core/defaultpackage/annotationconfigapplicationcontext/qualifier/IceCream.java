@@ -1,6 +1,5 @@
 package cc.vant.core.defaultpackage.annotationconfigapplicationcontext.qualifier;
 
-import cc.vant.core.annotations.Bean;
 import cc.vant.core.annotations.Qualifier;
 
 /**

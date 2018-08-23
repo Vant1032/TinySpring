@@ -3,22 +3,22 @@ package cc.vant.core;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Vant
  * @version 2018/8/13 下午 11:18
  */
 public class BeanContainer implements AutoCloseable {
-    private final Map<String, BeanGenerator> beanMap = new HashMap<>();
-    private final Map<String, BeanDefinition> definitionMap = new HashMap<>();
-    private final Map<Class<?>, ArrayList<String>> rBeanMap = new HashMap<>();
+    private final Map<String, BeanGenerator> beanMap = new ConcurrentHashMap<>(256);
+    private final Map<Class<?>, ArrayList<String>> rBeanMap = new ConcurrentHashMap<>(256);
 
-    public void addBean(@NotNull String beanName, Class<?> clazz, BeanDefinition beanDefinition, BeanGenerator beanGenerator) {
+    public void addBean(BeanDefinition beanDefinition, BeanGenerator beanGenerator) {
+        String beanName = beanDefinition.getBeanName();
+        Class<?> clazz = beanDefinition.getType();
         beanMap.put(beanName, beanGenerator);
-        definitionMap.put(beanName, beanDefinition);
         final ArrayList<String> beanNames = rBeanMap.get(clazz);
         if (beanNames == null) {
             final ArrayList<String> arrayList = new ArrayList<>(1);
@@ -45,6 +45,7 @@ public class BeanContainer implements AutoCloseable {
         return rBeanMap.get(clazz);
     }
 
+    @NotNull
     public Set<Class<?>> getClasses() {
         return rBeanMap.keySet();
     }
@@ -58,7 +59,6 @@ public class BeanContainer implements AutoCloseable {
     public void clear() {
         beanMap.clear();
         rBeanMap.clear();
-        definitionMap.clear();
     }
 
     @Override

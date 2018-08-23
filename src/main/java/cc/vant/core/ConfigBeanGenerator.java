@@ -18,7 +18,6 @@ import java.lang.reflect.Method;
 public class ConfigBeanGenerator implements BeanGenerator {
     private Object configInstance;
     private Method method;
-    private ScopeType scopeType = ScopeType.Singleton;
     private Object beanInstance;
     private BeanDefinition beanDefinition;
 
@@ -33,7 +32,7 @@ public class ConfigBeanGenerator implements BeanGenerator {
 
     @Override
     public Object generate(@NotNull BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException {
-        if (scopeType == ScopeType.Singleton) {
+        if (beanDefinition.getScopeType() == ScopeType.Singleton) {
             if (beanInstance == null) {
                 beanInstance = generateNew(beanFactory);
             }
@@ -66,14 +65,7 @@ public class ConfigBeanGenerator implements BeanGenerator {
         return method.invoke(configInstance, args);
     }
 
-    public ScopeType getScopeType() {
-        return scopeType;
-    }
-
-    public void setScopeType(ScopeType scopeType) {
-        this.scopeType = scopeType;
-    }
-
+    @Override
     public BeanDefinition getBeanDefinition() {
         return beanDefinition;
     }

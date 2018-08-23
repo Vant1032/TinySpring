@@ -1,13 +1,17 @@
 package cc.vant.core;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Vant
  * @version 2018/8/22 下午 2:33
  */
 public interface FactoryBean<T> {
-    T getObject() throws Exception;
+    @NotNull T getObject() throws Exception;
 
-    Class<?> getObjectType();
+    @NotNull Class<?> getObjectType();
 
     boolean isSingleton();
+
+    BeanDefinition getBeanDefinition();
 }

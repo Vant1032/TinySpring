@@ -14,4 +14,6 @@ public interface BeanGenerator {
      * @return bean
      */
     Object generate(BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException;
+
+    BeanDefinition getBeanDefinition();
 }

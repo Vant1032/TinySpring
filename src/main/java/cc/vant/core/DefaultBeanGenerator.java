@@ -19,15 +19,12 @@ import java.util.ArrayList;
  */
 public class DefaultBeanGenerator implements BeanGenerator {
     private Constructor<?> constructor;
-    private Class<?> clazz;
     @NotNull
     private ArrayList<Field> fields = new ArrayList<>();
-    private ScopeType scopeType = ScopeType.Singleton;
     private Object beanInstance;
     private BeanDefinition beanDefinition;
 
-    public DefaultBeanGenerator(Class<?> clazz, BeanDefinition beanDefinition) {
-        this.clazz = clazz;
+    public DefaultBeanGenerator(BeanDefinition beanDefinition) {
         this.beanDefinition = beanDefinition;
     }
 
@@ -42,15 +39,14 @@ public class DefaultBeanGenerator implements BeanGenerator {
         this.beanDefinition = beanDefinition;
     }
 
-    public DefaultBeanGenerator(Class<?> clazz, Field field, BeanDefinition beanDefinition) {
-        this.clazz = clazz;
+    public DefaultBeanGenerator(Field field, BeanDefinition beanDefinition) {
         fields.add(field);
         this.beanDefinition = beanDefinition;
     }
 
     @Override
     public Object generate(@NotNull BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        if (scopeType == ScopeType.Singleton) {
+        if (beanDefinition.getScopeType() == ScopeType.Singleton) {
             if (beanInstance == null) {
                 beanInstance = generateNew(beanFactory);
             }
@@ -68,7 +64,7 @@ public class DefaultBeanGenerator implements BeanGenerator {
     private Object generateNew(@NotNull BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         Object instance;
         if (constructor == null) {
-            instance = clazz.newInstance();
+            instance = beanDefinition.getType().newInstance();
         } else {
             final Class[] parameterTypes = constructor.getParameterTypes();
             final Autowired autowired = constructor.getAnnotation(Autowired.class);
@@ -121,18 +117,7 @@ public class DefaultBeanGenerator implements BeanGenerator {
         fields.add(field);
     }
 
-    public void setClazz(Class<?> clazz) {
-        this.clazz = clazz;
-    }
-
-    public ScopeType getScopeType() {
-        return scopeType;
-    }
-
-    public void setScopeType(ScopeType scopeType) {
-        this.scopeType = scopeType;
-    }
-
+    @Override
     public BeanDefinition getBeanDefinition() {
         return beanDefinition;
     }

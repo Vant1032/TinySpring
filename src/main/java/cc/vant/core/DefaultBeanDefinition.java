@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * @author Vant
  * @version 2018/8/22 下午 5:09
  */
-public class BeanDefinitionImpl implements BeanDefinition {
+public class DefaultBeanDefinition implements BeanDefinition {
     private ScopeType scopeType = ScopeType.Singleton;
     private String beanName;
     private boolean primary;

@@ -9,9 +9,6 @@ import cc.vant.core.annotations.Primary;
 import cc.vant.core.annotations.Qualifier;
 import cc.vant.core.annotations.Scope;
 import cc.vant.core.annotations.ScopeType;
-import cc.vant.core.exception.BeanInstantiationException;
-import cc.vant.core.exception.MultipleBeanDefinition;
-import cc.vant.core.exception.NoSuchBeanDefinitionException;
 import cc.vant.core.exception.SpringInitException;
 import cc.vant.core.util.SearchPackageClassUtil;
 import cc.vant.core.util.StringUtils;
@@ -20,15 +17,14 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * TODO:重构,将其拆成持有DefaultBeanFactory并用委托来产生Bean的形式
  * 添加了@Autowired接口和抽象类支持
  *
  * @author Vant
@@ -37,6 +33,9 @@ import java.util.Set;
 public class AnnotationConfigApplicationContext implements BeanFactory, AutoCloseable {
     @NotNull
     private BeanContainer beanContainer = new BeanContainer();
+
+    @NotNull
+    private DefaultBeanFactory beanFactory = new DefaultBeanFactory(beanContainer);
 
     /**
      * @param configs javaConfig类,用于配置TinySpring的类,该类必须用@Configuration注解
@@ -74,35 +73,19 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
                 throw new SpringInitException(method.getName() + " should use @Autowired");
             }
             if (bean != null) {
-                final BeanDefinitionImpl beanDefinition = new BeanDefinitionImpl();
+                final DefaultBeanDefinition beanDefinition = new DefaultBeanDefinition();
                 final ConfigBeanGenerator generator = new ConfigBeanGenerator(cfgInstance, method, beanDefinition);
                 String beanName = StringUtils.generateBeanName(beanContainer, bean, method.getReturnType());
                 final Scope scope = method.getAnnotation(Scope.class);
-                final ScopeType scopeType;
                 if (scope != null && scope.value() == ScopeType.Prototype) {
-                    scopeType = ScopeType.Prototype;
-                    generator.setScopeType(scopeType);
-                } else {
-                    scopeType = ScopeType.Singleton;
+                    beanDefinition.setScopeType(ScopeType.Prototype);
                 }
                 beanDefinition.setBeanName(beanName);
                 final Primary primary = method.getAnnotation(Primary.class);
                 beanDefinition.setPrimary(primary != null);
-                final Annotation[] annotations = method.getAnnotations();
-
-                final ArrayList<Annotation> qualifiers = new ArrayList<>();
-                beanDefinition.setQualifiers(qualifiers);
-                for (Annotation annotation : annotations) {
-                    if (annotation instanceof Qualifier) {
-                        Qualifier qualifier = (Qualifier) annotation;
-                        beanDefinition.setQualifierString(qualifier.value());
-                    } else if (annotation.getClass().getAnnotation(Qualifier.class) != null) {
-                        qualifiers.add(annotation);
-                    }
-                }
-                beanDefinition.setScopeType(scopeType);
+                resolveQualifier(method.getAnnotations(), beanDefinition);
                 beanDefinition.setType(method.getReturnType());
-                beanContainer.addBean(beanName, method.getReturnType(), beanDefinition, generator);
+                beanContainer.addBean(beanDefinition, generator);
             }
         }
     }
@@ -192,9 +175,9 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
                 }
             }
         }
-        final BeanDefinitionImpl beanDefinition = new BeanDefinitionImpl();
+        final DefaultBeanDefinition beanDefinition = new DefaultBeanDefinition();
         if (constructor == null) {
-            generator = new DefaultBeanGenerator(beanClass, beanDefinition);
+            generator = new DefaultBeanGenerator(beanDefinition);
         } else {
             generator = new DefaultBeanGenerator(constructor, beanDefinition);
         }
@@ -209,25 +192,28 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         //scope
         final Scope scope = beanClass.getAnnotation(Scope.class);
         if (scope != null && scope.value() == ScopeType.Prototype) {
-            generator.setScopeType(ScopeType.Prototype);
             beanDefinition.setScopeType(ScopeType.Prototype);
         }
         beanDefinition.setBeanName(beanName);
         beanDefinition.setType(beanClass);
         beanDefinition.setPrimary(beanClass.getAnnotation(Primary.class) != null);
+        resolveQualifier(beanClass.getAnnotations(), beanDefinition);
+        beanContainer.addBean(beanDefinition, generator);
+    }
+
+    private void resolveQualifier(@NotNull Annotation[] annotations, @NotNull DefaultBeanDefinition beanDefinition) {
         final ArrayList<Annotation> qualifiers = new ArrayList<>();
         beanDefinition.setQualifiers(qualifiers);
 
-        final Annotation[] annotations = beanClass.getAnnotations();
+        //qualifier
         for (Annotation annotation : annotations) {
-            if (annotation instanceof Qualifier) {
+            if (annotation.getClass().getAnnotation(Qualifier.class) != null) {
+                qualifiers.add(annotation);
+            } else if (annotation instanceof Qualifier) {
                 Qualifier qualifier = (Qualifier) annotation;
                 beanDefinition.setQualifierString(qualifier.value());
-            } else if (annotation.getClass().getAnnotation(Qualifier.class) != null) {
-                qualifiers.add(annotation);
             }
         }
-        beanContainer.addBean(beanName, beanClass, beanDefinition, generator);
     }
 
 
@@ -236,16 +222,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
      */
     @Override
     public Object getBean(String beanName) {
-        final BeanGenerator generator = beanContainer.getGenerator(beanName);
-        if (generator == null) {
-            throw new NoSuchBeanDefinitionException();
-        }
-
-        try {
-            return generator.generate(this);
-        } catch (@NotNull IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            throw new BeanInstantiationException(e);
-        }
+        return beanFactory.getBean(beanName);
     }
 
     /**
@@ -258,37 +235,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getBean(@NotNull Class<T> requireType) {
-        if (requireType.isInterface() || Modifier.isAbstract(requireType.getModifiers())) {
-            boolean unique = true;
-            Object beanInstance = null;
-            for (Class<?> beanClass : beanContainer.getClasses()) {
-                if (requireType.isAssignableFrom(beanClass)) {
-                    if (unique) {
-                        unique = false;
-                        beanInstance = getBean(beanClass);
-                    } else {
-                        throw new MultipleBeanDefinition(requireType.getName());
-                    }
-                }
-            }
-            if (beanInstance == null) {
-                throw new NoSuchBeanDefinitionException(requireType.getName());
-            }
-            return (T) beanInstance;
-        }
-        final ArrayList<String> beanNames = beanContainer.getBeanNames(requireType);
-        if (beanNames == null) {
-            throw new NoSuchBeanDefinitionException(requireType.getName());
-        } else {
-            if (beanNames.size() == 1) {
-                try {
-                    return (T) beanContainer.getGenerator(beanNames.get(0)).generate(this);
-                } catch (@NotNull IllegalAccessException | InvocationTargetException | InstantiationException e) {
-                    throw new BeanInstantiationException(beanNames.get(0) + " instantiate error ");
-                }
-            }
-            throw new MultipleBeanDefinition("the bean is not unique");
-        }
+        return beanFactory.getBean(requireType);
     }
 
     public ArrayList<String> getBeanNames(Class<?> clazz) {

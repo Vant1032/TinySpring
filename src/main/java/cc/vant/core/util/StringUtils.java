@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  * @author Vant
  * @version 2018/8/4 下午 1:50
  */
-public class StringUtils {
+public abstract class StringUtils {
     @NotNull
     public static String firstCharLower(@NotNull String string) {
         char[] buf = new char[string.length()];

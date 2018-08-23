@@ -20,7 +20,7 @@ import java.util.jar.JarFile;
  * @author Vant
  * @version 2018/8/2 上午 7:48
  */
-public class SearchPackageClassUtil {
+public abstract class SearchPackageClassUtil {
     /**
      * @return 包下的所有类名, 这些类名是互不重复的
      */
