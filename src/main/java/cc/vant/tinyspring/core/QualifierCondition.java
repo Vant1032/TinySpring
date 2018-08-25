@@ -40,7 +40,12 @@ public class QualifierCondition {
     }
 
     public boolean matchQualifier(BeanDefinition def) {
-        return def.getQualifierString().equals(qualifierStr) && def.getQualifiers().containsAll(Arrays.asList(qualifiers));
+        if (qualifierStr != null){
+            if (!qualifierStr.equals(def.getQualifierString())) {
+                return false;
+            }
+        }
+        return def.getQualifiers().containsAll(Arrays.asList(qualifiers));
     }
 
     /**

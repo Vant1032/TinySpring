@@ -15,7 +15,7 @@ class SearchPackageClassUtilTest {
     @Test
     @DisplayName("正常扫描包")
     void searchPackageClass() {
-        String[] cores = SearchPackageClassUtil.searchPackageClass("cc.vant.core");
+        String[] cores = SearchPackageClassUtil.searchPackageClass("cc.vant.tinyspring.core");
         for (String core : cores) {
             System.out.println(core);
         }

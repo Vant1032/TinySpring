@@ -1,6 +1,7 @@
 package cc.vant.tinyspring.core;
 
 import cc.vant.tinyspring.core.annotations.ScopeType;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -14,7 +15,8 @@ public class DefaultBeanDefinition implements BeanDefinition {
     private String beanName;
     private boolean primary;
     private Class<?> type;
-    private String qualifierString = "";
+    @Nullable
+    private String qualifierString;
     private ArrayList<Annotation> qualifiers;
 
 

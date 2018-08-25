@@ -10,6 +10,8 @@ import cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontext
 import cc.vant.tinyspring.core.exception.SpringInitException;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -28,6 +30,7 @@ class AnnotationConfigApplicationContextTest {
 
     @Test
     void abstractBean() {
+        Optional.of(5).ifPresent(integer -> {});
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig.class);
         final IFather father = context.getBean(IFather.class);
         father.foo();

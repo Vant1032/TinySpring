@@ -107,14 +107,13 @@ public class DefaultBeanFactory implements BeanFactory {
     private <T> T getAbstractBean(@NotNull Class<?> requireType, @NotNull QualifierCondition condition) {
         boolean primary = false;
         BeanGenerator result = null;
-        final List<Annotation> qcondition = Arrays.asList(condition.getQualifiers());
 
         for (Class<?> beanClass : beanContainer.getClasses()) {
             if (requireType.isAssignableFrom(beanClass)) {
                 //搜索各种条件的bean
                 for (BeanGenerator generator : beanContainer.getGenerators(beanClass)) {
                     final BeanDefinition beanDefinition = generator.getBeanDefinition();
-                    if (beanDefinition.getQualifiers().containsAll(qcondition) && beanDefinition.getQualifierString().equals(condition.getQualifierStr())) {
+                    if (condition.matchQualifier(beanDefinition)) {
                         if (beanDefinition.isPrimary()) {
                             if (primary) {
                                 throw new SpringInitException("multiple primary annotation");
@@ -127,11 +126,11 @@ public class DefaultBeanFactory implements BeanFactory {
             }
         }
 
-        if (result == null) {
+        if (result == null && condition.getQualifierStr() != null) {
             //找不到相关的,就通过@Qualifier的值作为BeanName尝试寻找
             result = beanContainer.getGenerator(condition.getQualifierStr());
-            if (result == null) return null;
         }
+        if (result == null) throw new NoSuchBeanDefinitionException(requireType.getName());
 
         try {
             return (T) result.generate(this);
@@ -175,8 +174,10 @@ public class DefaultBeanFactory implements BeanFactory {
         }
         if (gen == null && condition.getQualifierStr() != null) {
             gen = beanContainer.getGenerator(condition.getQualifierStr());
-            if (gen == null) return null;
+
         }
+        if (gen == null) throw new NoSuchBeanDefinitionException(requireType.getName());
+
         try {
             return (T) gen.generate(this);
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {

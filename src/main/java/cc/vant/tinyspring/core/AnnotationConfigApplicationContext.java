@@ -25,7 +25,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * TODO:重构,将其拆成持有DefaultBeanFactory并用委托来产生Bean的形式
+ * TODO:处理Autowired里面的getBean方法,让@Qualifier完全实现
+ * 持有DefaultBeanFactory并用委托来产生Bean的形式
  * 添加了@Autowired接口和抽象类支持
  *
  * @author Vant
@@ -242,6 +243,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
     public ArrayList<String> getBeanNames(Class<?> clazz) {
         return beanContainer.getBeanNames(clazz);
     }
+
 
     @Override
     public void close() throws Exception {
