@@ -25,13 +25,14 @@ public class DefaultBeanFactory implements QualifiableBeanFactory {
     }
 
     /**
-     * @return 如果没有找到则抛异常
+     * @return 如果没有找到返回null,否则为Bean
      */
     @Override
+    @Nullable
     public Object getBean(String beanName) {
         final BeanGenerator generator = beanContainer.getGenerator(beanName);
         if (generator == null) {
-            throw new NoSuchBeanDefinitionException();
+            return null;
         }
 
         try {
@@ -43,11 +44,10 @@ public class DefaultBeanFactory implements QualifiableBeanFactory {
 
     /**
      * 遇到抽象类或接口时会遍历所有bean以找到子类
-     *
-     * @return 若没有找到则抛异常
+     * @return null若没有找到,否则为Bean
      * @throws MultipleBeanDefinition 若找到多个匹配项
      */
-    @NotNull
+    @Nullable
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getBean(@NotNull Class<T> requireType) {
@@ -56,7 +56,7 @@ public class DefaultBeanFactory implements QualifiableBeanFactory {
         }
         final ArrayList<String> beanNames = beanContainer.getBeanNames(requireType);
         if (beanNames == null) {
-            throw new NoSuchBeanDefinitionException(requireType.getName());
+            return null;
         } else {
             if (beanNames.size() == 1) {
                 try {
@@ -79,7 +79,7 @@ public class DefaultBeanFactory implements QualifiableBeanFactory {
                 }
                 try {
                     return (T) result.generate(this);
-                } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+                } catch (@NotNull IllegalAccessException | InvocationTargetException | InstantiationException e) {
                     throw new NoSuchBeanDefinitionException(requireType.getName(), e);
                 }
             }
@@ -89,11 +89,12 @@ public class DefaultBeanFactory implements QualifiableBeanFactory {
     /**
      * 可以处理@Primary以及@Qualifier的情况
      *
-     * @param requireType
+     * @param requireType 只能是一个抽象类或接口的Class,不可以是具体类的,因为没有相应检查
      * @param qualifiers  可以是@Qualifier(只能有一个),也可以是被@Qualifier注释的其它注释
      * @param <T>         Bean class type
-     * @return Bean
+     * @return null如果没有找到,否则为Bean
      */
+    @Nullable
     private <T> T getAbstractBean(@NotNull Class<T> requireType, @NotNull Annotation... qualifiers) {
         return getAbstractBean(requireType, toQualifierCondition(qualifiers));
     }
@@ -129,17 +130,18 @@ public class DefaultBeanFactory implements QualifiableBeanFactory {
             //找不到相关的,就通过@Qualifier的值作为BeanName尝试寻找
             result = beanContainer.getGenerator(condition.getQualifierStr());
         }
-        if (result == null) throw new NoSuchBeanDefinitionException(requireType.getName());
+        if (result == null) return null;
 
         try {
             return (T) result.generate(this);
-        } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (@NotNull IllegalAccessException | InvocationTargetException | InstantiationException e) {
             throw new BeanInstantiationException(requireType.getName());
         }
     }
 
+    @Nullable
     @Override
-    public <T> T getBeanByQualifier(Class<T> requireType, Annotation... qualifiers) {
+    public <T> T getBeanByQualifier(@NotNull Class<T> requireType, Annotation... qualifiers) {
         return getBeanByQualifier(requireType, toQualifierCondition(qualifiers));
     }
 
@@ -150,13 +152,13 @@ public class DefaultBeanFactory implements QualifiableBeanFactory {
     @Nullable
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T getBeanByQualifier(Class<T> requireType, QualifierCondition condition) {
+    public <T> T getBeanByQualifier(@NotNull Class<T> requireType, @NotNull QualifierCondition condition) {
         if (requireType.isInterface() || Modifier.isAbstract(requireType.getModifiers())) {
             return getAbstractBean(requireType, condition);
         }
         final ArrayList<BeanGenerator> generators = beanContainer.getGenerators(requireType);
         if (generators.size() == 0) {
-            throw new NoSuchBeanDefinitionException(requireType.getName());
+            return null;
         }
         BeanGenerator gen = null;
         boolean primary = false;
@@ -176,11 +178,13 @@ public class DefaultBeanFactory implements QualifiableBeanFactory {
             gen = beanContainer.getGenerator(condition.getQualifierStr());
 
         }
-        if (gen == null) throw new NoSuchBeanDefinitionException(requireType.getName());
+        if (gen == null) {
+            return null;
+        }
 
         try {
             return (T) gen.generate(this);
-        } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (@NotNull IllegalAccessException | InvocationTargetException | InstantiationException e) {
             throw new BeanInstantiationException(requireType.getName());
         }
     }
@@ -190,6 +194,7 @@ public class DefaultBeanFactory implements QualifiableBeanFactory {
      * @param qualifiers 可以是@Qualifier(最多只能有一个),也可以是被@Qualifier注解的其它注解
      * @return QualifierCondition.getQualifierStr 可能为null
      */
+    @NotNull
     private static QualifierCondition toQualifierCondition(@NotNull Annotation... qualifiers) {
         Annotation[] tmp = null;
         QualifierCondition condition = new QualifierCondition();

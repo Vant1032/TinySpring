@@ -13,7 +13,7 @@ public interface BeanGenerator {
      * @param beanFactory 为了处理bean之间的依赖关系
      * @return bean
      */
-    Object generate(BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException;
+    Object generate(QualifiableBeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException;
 
     BeanDefinition getBeanDefinition();
 }

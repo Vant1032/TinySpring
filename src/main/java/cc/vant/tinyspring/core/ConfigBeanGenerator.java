@@ -2,10 +2,10 @@ package cc.vant.tinyspring.core;
 
 import cc.vant.tinyspring.core.annotations.Autowired;
 import cc.vant.tinyspring.core.annotations.ScopeType;
-import cc.vant.tinyspring.core.exception.BeanInstantiationException;
 import cc.vant.tinyspring.core.exception.NoSuchBeanDefinitionException;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -31,7 +31,7 @@ public class ConfigBeanGenerator implements BeanGenerator {
     }
 
     @Override
-    public Object generate(@NotNull BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException {
+    public Object generate(@NotNull QualifiableBeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException {
         if (beanDefinition.getScopeType() == ScopeType.Singleton) {
             if (beanInstance == null) {
                 beanInstance = generateNew(beanFactory);
@@ -41,28 +41,22 @@ public class ConfigBeanGenerator implements BeanGenerator {
         return generateNew(beanFactory);
     }
 
-    public Object generateNew(@NotNull BeanFactory beanFactory) throws InvocationTargetException, IllegalAccessException {
-        final Class<?>[] parameterTypes = method.getParameterTypes();
-        Object[] args = new Object[parameterTypes.length];
-        if (parameterTypes.length > 0) {
-            if (method.getAnnotation(Autowired.class).required()) {
-                for (int i = 0; i < parameterTypes.length; i++) {
-                    args[i] = beanFactory.getBean(parameterTypes[i]);
-                }
-            } else {
-                for (int i = 0; i < parameterTypes.length; i++) {
-                    try {
-                        args[i] = beanFactory.getBean(parameterTypes[i]);
-                    } catch (@NotNull NoSuchBeanDefinitionException | BeanInstantiationException e) {
-                        args[i] = null;
-                    }
-                }
-            }
-        }
+    public Object generateNew(@NotNull QualifiableBeanFactory beanFactory) throws InvocationTargetException, IllegalAccessException {
         if (!method.isAccessible()) {
             method.setAccessible(true);
         }
-        return method.invoke(configInstance, args);
+
+        final Class<?>[] parameterTypes = method.getParameterTypes();
+        if (parameterTypes.length > 0) {
+            //添加@Qualifier支持
+            boolean required = method.getAnnotation(Autowired.class).required();
+            Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+
+            Object[] args = DefaultBeanGenerator.fillBean(required, parameterTypes, parameterAnnotations, beanFactory);
+
+            return method.invoke(configInstance, args);
+        }
+        return method.invoke(configInstance);
     }
 
     @Override

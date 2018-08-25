@@ -18,7 +18,7 @@ public class FactoryBeanGenerator implements BeanGenerator {
 
     @NotNull
     @Override
-    public Object generate(BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+    public Object generate(QualifiableBeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         try {
             return factoryBean.getObject();
         } catch (Exception e) {

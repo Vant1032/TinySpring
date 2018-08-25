@@ -9,5 +9,8 @@ import org.jetbrains.annotations.NotNull;
 public interface BeanFactory {
     Object getBean(String beanName);
 
-    @NotNull <T> T getBean(Class<T> requireType);
+    /**
+     * @return 找不到Bean时返回Null还是抛异常依赖于实现
+     */
+    <T> T getBean(Class<T> requireType);
 }

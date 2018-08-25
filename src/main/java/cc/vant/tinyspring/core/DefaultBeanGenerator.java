@@ -46,7 +46,7 @@ public class DefaultBeanGenerator implements BeanGenerator {
     }
 
     @Override
-    public Object generate(@NotNull BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+    public Object generate(@NotNull QualifiableBeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         if (beanDefinition.getScopeType() == ScopeType.Singleton) {
             if (beanInstance == null) {
                 beanInstance = generateNew(beanFactory);
@@ -62,34 +62,18 @@ public class DefaultBeanGenerator implements BeanGenerator {
      * @param beanFactory 用来处理bean之间的依赖关系
      */
     @SuppressWarnings("unchecked")
-    private Object generateNew(@NotNull BeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+    private Object generateNew(@NotNull QualifiableBeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         Object instance;
         if (constructor == null) {
             instance = beanDefinition.getType().newInstance();
+        }else if (constructor.getParameterCount() == 0) {
+            instance = constructor.newInstance();
         } else {
-            final Class[] parameterTypes = constructor.getParameterTypes();
+            boolean required = constructor.getAnnotation(Autowired.class).required();
+            Class<?>[] parameterTypes = constructor.getParameterTypes();
             Annotation[][] parameterAnnotations = constructor.getParameterAnnotations();
-            Object[] objects = new Object[parameterTypes.length];
-            //对@Autowired require属性的支持
-            if (parameterTypes.length > 0) {//TODO:参数上标注Qualifier的解决方案
-                if (constructor.getAnnotation(Autowired.class).required()) {
-                    for (int i = 0; i < parameterTypes.length; i++) {
-                        if (parameterAnnotations[i].length == 0) {
-                            objects[i] = beanFactory.getBean(parameterTypes[i]);
-                        } else {
-                            
-                        }
-                    }
-                } else {
-                    for (int i = 0; i < parameterTypes.length; i++) {
-                        try {
-                            objects[i] = beanFactory.getBean(parameterTypes[i]);
-                        } catch (@NotNull NoSuchBeanDefinitionException | BeanInstantiationException e) {
-                            objects[i] = null;
-                        }
-                    }
-                }
-            }
+
+            Object[] objects = fillBean(required, parameterTypes, parameterAnnotations, beanFactory);
 
             instance = constructor.newInstance(objects);
         }
@@ -129,5 +113,40 @@ public class DefaultBeanGenerator implements BeanGenerator {
 
     public void setBeanDefinition(BeanDefinition beanDefinition) {
         this.beanDefinition = beanDefinition;
+    }
+
+
+    /**
+     * 提供对@Qualifier的支持来查找一组Bean
+     * @param required true如果找不到Bean抛异常,false则找不到Bean用null填充
+     * @param requireTypes 待填充的Bean的class类型
+     * @param annotations 里面包含各个Bean所需的Qualifier,顺序与requireTypes一致
+     * @param beanFactory 用于处理依赖
+     * @return Beans
+     */
+    @SuppressWarnings("unchecked")
+    public static Object[] fillBean(boolean required, Class[] requireTypes, Annotation[][] annotations, QualifiableBeanFactory beanFactory) {
+        Object[] objects = new Object[requireTypes.length];
+        //对@Autowired require属性的支持
+        if (requireTypes.length > 0) {
+            //参数上标注Qualifier的解决方案
+            if (required) {
+                for (int i = 0; i < requireTypes.length; i++) {
+                    if (annotations[i].length == 0) {
+                        objects[i] = beanFactory.getBean(requireTypes[i]);
+                    } else {
+                        objects[i] = beanFactory.getBeanByQualifier(requireTypes[i], annotations[i]);
+                    }
+                    if (objects[i] == null) {
+                        throw new NoSuchBeanDefinitionException(requireTypes[i].getName());
+                    }
+                }
+            } else {
+                for (int i = 0; i < requireTypes.length; i++) {
+                    objects[i] = beanFactory.getBean(requireTypes[i]);
+                }
+            }
+        }
+        return objects;
     }
 }

@@ -14,6 +14,7 @@ import cc.vant.tinyspring.core.exception.SpringInitException;
 import cc.vant.tinyspring.core.util.SearchPackageClassUtil;
 import cc.vant.tinyspring.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -217,8 +218,10 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
 
 
     /**
-     * @return 如果没有找到则抛异常
+     * @return null若没有找到,否则为Bean
+     * @throws MultipleBeanDefinition 若找到多个匹配项
      */
+    @Nullable
     @Override
     public Object getBean(String beanName) {
         return beanFactory.getBean(beanName);
@@ -227,10 +230,10 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
     /**
      * 遇到抽象类或接口时会遍历所有bean以找到子类
      *
-     * @return 若没有找到则抛异常
+     * @return null若没有找到, 否则为Bean
      * @throws MultipleBeanDefinition 若找到多个匹配项
      */
-    @NotNull
+    @Nullable
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getBean(@NotNull Class<T> requireType) {
