@@ -1,5 +1,6 @@
 package cc.vant.tinyspring.core;
 
+import cc.vant.tinyspring.core.annotations.Qualifier;
 import cc.vant.tinyspring.core.exception.BeanInstantiationException;
 import cc.vant.tinyspring.core.exception.MultipleBeanDefinition;
 import cc.vant.tinyspring.core.exception.NoSuchBeanDefinitionException;
@@ -11,14 +12,12 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author Vant
  * @version 2018/8/23 下午 9:16
  */
-public class DefaultBeanFactory implements BeanFactory {
+public class DefaultBeanFactory implements QualifiableBeanFactory {
     private BeanContainer beanContainer;
 
     public DefaultBeanFactory(BeanContainer beanContainer) {
@@ -95,12 +94,12 @@ public class DefaultBeanFactory implements BeanFactory {
      * @param <T>         Bean class type
      * @return Bean
      */
-    private  <T> T getAbstractBean(@NotNull Class<T> requireType, @NotNull Annotation... qualifiers) {
-        return getAbstractBean(requireType, QualifierCondition.get(qualifiers));
+    private <T> T getAbstractBean(@NotNull Class<T> requireType, @NotNull Annotation... qualifiers) {
+        return getAbstractBean(requireType, toQualifierCondition(qualifiers));
     }
 
     /**
-     * @return null如果没有找到,否则返回Bean
+     * @return null如果没有找到, 否则返回Bean
      */
     @SuppressWarnings("unchecked")
     @Nullable
@@ -139,17 +138,18 @@ public class DefaultBeanFactory implements BeanFactory {
         }
     }
 
-
+    @Override
     public <T> T getBeanByQualifier(Class<T> requireType, Annotation... qualifiers) {
-        return getBeanByQualifier(requireType, QualifierCondition.get(qualifiers));
+        return getBeanByQualifier(requireType, toQualifierCondition(qualifiers));
     }
 
     /**
      * @param <T> BeanType
-     * @return null如果没有找到,否则返回Bean
+     * @return null如果没有找到, 否则返回Bean
      */
     @Nullable
     @SuppressWarnings("unchecked")
+    @Override
     public <T> T getBeanByQualifier(Class<T> requireType, QualifierCondition condition) {
         if (requireType.isInterface() || Modifier.isAbstract(requireType.getModifiers())) {
             return getAbstractBean(requireType, condition);
@@ -183,5 +183,28 @@ public class DefaultBeanFactory implements BeanFactory {
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
             throw new BeanInstantiationException(requireType.getName());
         }
+    }
+
+
+    /**
+     * @param qualifiers 可以是@Qualifier(最多只能有一个),也可以是被@Qualifier注解的其它注解
+     * @return QualifierCondition.getQualifierStr 可能为null
+     */
+    private static QualifierCondition toQualifierCondition(@NotNull Annotation... qualifiers) {
+        Annotation[] tmp = null;
+        QualifierCondition condition = new QualifierCondition();
+        for (int i = 0; i < qualifiers.length; i++) {
+            if (qualifiers[i] instanceof Qualifier) {
+                Qualifier q = (Qualifier) qualifiers[i];
+                condition.setQualifierStr(q.value());
+                tmp = new Annotation[qualifiers.length - 1];
+                System.arraycopy(qualifiers, 0, tmp, 0, i - 1);
+                System.arraycopy(qualifiers, i + 1, tmp, i, qualifiers.length - i - 1);
+                condition.setQualifiers(tmp);
+                return condition;
+            }
+        }
+        condition.setQualifiers(qualifiers);
+        return condition;
     }
 }

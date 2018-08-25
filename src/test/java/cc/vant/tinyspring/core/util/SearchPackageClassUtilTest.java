@@ -11,16 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @version 2018/8/3 下午 4:42
  */
 class SearchPackageClassUtilTest {
-
-    @Test
-    @DisplayName("正常扫描包")
-    void searchPackageClass() {
-        String[] cores = SearchPackageClassUtil.searchPackageClass("cc.vant.tinyspring.core");
-        for (String core : cores) {
-            System.out.println(core);
-        }
-    }
-
     @Test
     @DisplayName("不存在的包的处理")
     void searchPackageClassNotExits() {

@@ -45,7 +45,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
     public AnnotationConfigApplicationContext(@NotNull Class<?>... configs) {
         Set<String> scannedPackage = new HashSet<>();
         for (Class<?> config : configs) {
-            if (config.getAnnotation(Configuration.class) == null) {
+            if (config.isAnnotationPresent(Configuration.class)) {
                 throw new SpringInitException(config.getName() + " is not annotated by Configuration");
             }
 
@@ -71,7 +71,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         final Method[] methods = config.getDeclaredMethods();
         for (Method method : methods) {
             final Bean bean = method.getAnnotation(Bean.class);
-            if (method.getParameterCount() > 0 && method.getAnnotation(Autowired.class) == null) {
+            if (method.getParameterCount() > 0 && method.isAnnotationPresent(Autowired.class)) {
                 throw new SpringInitException(method.getName() + " should use @Autowired");
             }
             if (bean != null) {
@@ -83,8 +83,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
                     beanDefinition.setScopeType(ScopeType.Prototype);
                 }
                 beanDefinition.setBeanName(beanName);
-                final Primary primary = method.getAnnotation(Primary.class);
-                beanDefinition.setPrimary(primary != null);
+                beanDefinition.setPrimary(method.isAnnotationPresent(Primary.class));
                 resolveQualifier(method.getAnnotations(), beanDefinition);
                 beanDefinition.setType(method.getReturnType());
                 beanContainer.addBean(beanDefinition, generator);
@@ -167,8 +166,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         boolean already = false;
         Constructor<?> constructor = null;
         for (Constructor<?> declaredConstructor : declaredConstructors) {
-            final Autowired autowired = declaredConstructor.getAnnotation(Autowired.class);
-            if (autowired != null) {
+            if (declaredConstructor.isAnnotationPresent(Autowired.class)) {
                 if (already) {
                     throw new SpringInitException(beanClass.getName() + " have multiple constructor");
                 } else {
@@ -186,8 +184,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         //fields
         final Field[] declaredFields = beanClass.getDeclaredFields();
         for (Field declaredField : declaredFields) {
-            final Autowired autowired = declaredField.getAnnotation(Autowired.class);
-            if (autowired == null) continue;
+            if (!declaredField.isAnnotationPresent(Autowired.class)) continue;
             generator.addField(declaredField);
         }
 
@@ -198,7 +195,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         }
         beanDefinition.setBeanName(beanName);
         beanDefinition.setType(beanClass);
-        beanDefinition.setPrimary(beanClass.getAnnotation(Primary.class) != null);
+        beanDefinition.setPrimary(beanClass.isAnnotationPresent(Primary.class));
         resolveQualifier(beanClass.getAnnotations(), beanDefinition);
         beanContainer.addBean(beanDefinition, generator);
     }
@@ -209,7 +206,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
 
         //qualifier
         for (Annotation annotation : annotations) {
-            if (annotation.getClass().getAnnotation(Qualifier.class) != null) {
+            if (annotation.getClass().isAnnotationPresent(Qualifier.class)) {
                 qualifiers.add(annotation);
             } else if (annotation instanceof Qualifier) {
                 Qualifier qualifier = (Qualifier) annotation;

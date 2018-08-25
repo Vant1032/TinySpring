@@ -6,6 +6,7 @@ import cc.vant.tinyspring.core.exception.BeanInstantiationException;
 import cc.vant.tinyspring.core.exception.NoSuchBeanDefinitionException;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -67,13 +68,17 @@ public class DefaultBeanGenerator implements BeanGenerator {
             instance = beanDefinition.getType().newInstance();
         } else {
             final Class[] parameterTypes = constructor.getParameterTypes();
-            final Autowired autowired = constructor.getAnnotation(Autowired.class);
+            Annotation[][] parameterAnnotations = constructor.getParameterAnnotations();
             Object[] objects = new Object[parameterTypes.length];
             //对@Autowired require属性的支持
-            if (parameterTypes.length > 0) {
-                if (autowired.required()) {
+            if (parameterTypes.length > 0) {//TODO:参数上标注Qualifier的解决方案
+                if (constructor.getAnnotation(Autowired.class).required()) {
                     for (int i = 0; i < parameterTypes.length; i++) {
-                        objects[i] = beanFactory.getBean(parameterTypes[i]);
+                        if (parameterAnnotations[i].length == 0) {
+                            objects[i] = beanFactory.getBean(parameterTypes[i]);
+                        } else {
+                            
+                        }
                     }
                 } else {
                     for (int i = 0; i < parameterTypes.length; i++) {
