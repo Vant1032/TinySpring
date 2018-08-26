@@ -2,13 +2,14 @@ package cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontex
 
 import cc.vant.tinyspring.core.annotations.Autowired;
 import cc.vant.tinyspring.core.annotations.Bean;
+import cc.vant.tinyspring.core.annotations.Component;
 import cc.vant.tinyspring.core.annotations.Qualifier;
 
 /**
  * @author Vant
  * @since 2018/8/26 18:00
  */
-@Bean
+@Component
 public class Consume {
     @Autowired
     @Qualifier("big")

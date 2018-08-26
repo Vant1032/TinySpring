@@ -32,4 +32,8 @@ class SearchPackageClassUtilTest {
             }
         });
     }
+
+    static class Name {
+    }
+
 }

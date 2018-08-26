@@ -87,7 +87,7 @@ public class DefaultBeanGenerator implements BeanGenerator {
                 if (QualifierCondition.get(field.getAnnotations()).empty()) {
                     bean = beanFactory.getBean(field.getType());
                 } else {
-                    bean = beanFactory.getBeanByQualifier(field.getType());
+                    bean = beanFactory.getBeanByQualifier(field.getType(), field.getAnnotations());
                 }
 
                 if (bean == null) {

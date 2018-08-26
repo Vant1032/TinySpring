@@ -30,7 +30,6 @@ class AnnotationConfigApplicationContextTest {
 
     @Test
     void abstractBean() {
-        Optional.of(5).ifPresent(integer -> {});
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig.class);
         final IFather father = context.getBean(IFather.class);
         father.foo();

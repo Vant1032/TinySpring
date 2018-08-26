@@ -1,14 +1,7 @@
 package cc.vant.tinyspring.core;
 
 
-import cc.vant.tinyspring.core.annotations.Autowired;
-import cc.vant.tinyspring.core.annotations.Bean;
-import cc.vant.tinyspring.core.annotations.ComponentScan;
-import cc.vant.tinyspring.core.annotations.Configuration;
-import cc.vant.tinyspring.core.annotations.Primary;
-import cc.vant.tinyspring.core.annotations.Qualifier;
-import cc.vant.tinyspring.core.annotations.Scope;
-import cc.vant.tinyspring.core.annotations.ScopeType;
+import cc.vant.tinyspring.core.annotations.*;
 import cc.vant.tinyspring.core.exception.MultipleBeanDefinition;
 import cc.vant.tinyspring.core.exception.SpringInitException;
 import cc.vant.tinyspring.core.util.SearchPackageClassUtil;
@@ -26,7 +19,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * TODO:处理Autowired里面的getBean方法,让@Qualifier完全实现
  * 持有DefaultBeanFactory并用委托来产生Bean的形式
  * 添加了@Autowired接口和抽象类支持
  *
@@ -72,23 +64,24 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         final Method[] methods = config.getDeclaredMethods();
         for (Method method : methods) {
             final Bean bean = method.getAnnotation(Bean.class);
+            if (bean == null) {
+                continue;
+            }
             if (method.getParameterCount() > 0 && !method.isAnnotationPresent(Autowired.class)) {
                 throw new SpringInitException(method.getName() + " should use @Autowired");
             }
-            if (bean != null) {
-                final DefaultBeanDefinition beanDefinition = new DefaultBeanDefinition();
-                final ConfigBeanGenerator generator = new ConfigBeanGenerator(cfgInstance, method, beanDefinition);
-                String beanName = StringUtils.generateBeanName(beanContainer, bean, method.getReturnType());
-                final Scope scope = method.getAnnotation(Scope.class);
-                if (scope != null && scope.value() == ScopeType.Prototype) {
-                    beanDefinition.setScopeType(ScopeType.Prototype);
-                }
-                beanDefinition.setBeanName(beanName);
-                beanDefinition.setPrimary(method.isAnnotationPresent(Primary.class));
-                resolveQualifier(method.getAnnotations(), beanDefinition);
-                beanDefinition.setType(method.getReturnType());
-                beanContainer.addBean(beanDefinition, generator);
+            final DefaultBeanDefinition beanDefinition = new DefaultBeanDefinition();
+            final ConfigBeanGenerator generator = new ConfigBeanGenerator(cfgInstance, method, beanDefinition);
+            String beanName = StringUtils.generateBeanName(beanContainer, bean.value(), method.getReturnType());
+            final Scope scope = method.getAnnotation(Scope.class);
+            if (scope != null && scope.value() == ScopeType.Prototype) {
+                beanDefinition.setScopeType(ScopeType.Prototype);
             }
+            beanDefinition.setBeanName(beanName);
+            beanDefinition.setPrimary(method.isAnnotationPresent(Primary.class));
+            resolveQualifier(method.getAnnotations(), beanDefinition);
+            beanDefinition.setType(method.getReturnType());
+            beanContainer.addBean(beanDefinition, generator);
         }
     }
 
@@ -155,10 +148,9 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         }
 
         //处理bean
-        Bean beanAnnotation = beanClass.getAnnotation(Bean.class);
-        if (beanAnnotation == null) return;
-
-        String beanName = StringUtils.generateBeanName(beanContainer, beanAnnotation, beanClass);
+        String value = resolveBeanAnnotation(beanClass);
+        if (value == null) return;
+        String beanName = StringUtils.generateBeanName(beanContainer, value, beanClass);
 
         //处理autowired
         //Constructors(最多只能有一个Constructor可以autowired,否则报错)
@@ -218,7 +210,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
 
 
     /**
-     * @return null若没有找到,否则为Bean
+     * @return null若没有找到, 否则为Bean
      * @throws MultipleBeanDefinition 若找到多个匹配项
      */
     @Nullable
@@ -248,5 +240,28 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
     @Override
     public void close() throws Exception {
         beanContainer.clear();
+    }
+
+    /**
+     * @return null若没发现@Component,@Service,@Repository,@Controller其中一个,否则返回其value
+     */
+    private String resolveBeanAnnotation(Class<?> beanClass) {
+        Component co = beanClass.getAnnotation(Component.class);
+        if (co != null) {
+            return co.value();
+        }
+        Service ser = beanClass.getAnnotation(Service.class);
+        if (ser != null) {
+            return ser.value();
+        }
+        Repository rep = beanClass.getAnnotation(Repository.class);
+        if (rep != null) {
+            return rep.value();
+        }
+        Controller con = beanClass.getAnnotation(Controller.class);
+        if (con != null) {
+            return con.value();
+        }
+        return null;
     }
 }

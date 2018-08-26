@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  * @since 2018/8/3 12:42
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.METHOD})
 @Documented
 public @interface Bean {
     @NotNull String value() default "";

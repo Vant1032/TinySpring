@@ -2,6 +2,7 @@ package cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontex
 
 import cc.vant.tinyspring.core.annotations.Autowired;
 import cc.vant.tinyspring.core.annotations.Bean;
+import cc.vant.tinyspring.core.annotations.Component;
 
 import java.util.Scanner;
 
@@ -9,7 +10,7 @@ import java.util.Scanner;
  * @author Vant
  * @since 2018/8/10 21:52
  */
-@Bean
+@Component
 public class CauseWrong {
     @Autowired
     private Scanner scanner;

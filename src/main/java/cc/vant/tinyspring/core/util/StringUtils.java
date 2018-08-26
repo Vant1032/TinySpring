@@ -18,9 +18,9 @@ public abstract class StringUtils {
         return String.valueOf(buf);
     }
 
-    public static String generateBeanName(@NotNull BeanContainer beanContainer, @NotNull Bean bean, @NotNull Class<?> type) {
+    public static String generateBeanName(@NotNull BeanContainer beanContainer, @NotNull String beanValue, @NotNull Class<?> type) {
         String beanName;
-        if ("".equals(bean.value())) {
+        if ("".equals(beanValue)) {
             beanName = StringUtils.firstCharLower(type.getSimpleName());
             final String old = beanName;
             int i = 1;
@@ -29,7 +29,7 @@ public abstract class StringUtils {
                 i++;
             }
         } else {
-            beanName = bean.value();
+            beanName = beanValue;
             if (beanContainer.nameExist(beanName)) {
                 throw new BeanInstantiationException("the name " + beanName + " is already exist ");
             }

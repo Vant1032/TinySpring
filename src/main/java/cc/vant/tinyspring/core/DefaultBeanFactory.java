@@ -96,7 +96,7 @@ public class DefaultBeanFactory implements QualifiableBeanFactory {
      */
     @Nullable
     private <T> T getAbstractBean(@NotNull Class<T> requireType, @NotNull Annotation... qualifiers) {
-        return getAbstractBean(requireType, toQualifierCondition(qualifiers));
+        return getAbstractBean(requireType, QualifierCondition.get(qualifiers));
     }
 
     /**
@@ -139,10 +139,13 @@ public class DefaultBeanFactory implements QualifiableBeanFactory {
         }
     }
 
+    /**
+     * @param qualifiers 包含Qualifier
+     */
     @Nullable
     @Override
-    public <T> T getBeanByQualifier(@NotNull Class<T> requireType, Annotation... qualifiers) {
-        return getBeanByQualifier(requireType, toQualifierCondition(qualifiers));
+    public <T> T getBeanByQualifier(@NotNull Class<T> requireType, Annotation[] qualifiers) {
+        return getBeanByQualifier(requireType, QualifierCondition.get(qualifiers));
     }
 
     /**
@@ -191,7 +194,7 @@ public class DefaultBeanFactory implements QualifiableBeanFactory {
 
 
     /**
-     * @param qualifiers 可以是@Qualifier(最多只能有一个),也可以是被@Qualifier注解的其它注解
+     * @param qualifiers 不可以包含非@Qualifier类型可以是@Qualifier(最多只能有一个),也可以是被@Qualifier注解的其它注解
      * @return QualifierCondition.getQualifierStr 可能为null
      */
     @NotNull
@@ -203,8 +206,12 @@ public class DefaultBeanFactory implements QualifiableBeanFactory {
                 Qualifier q = (Qualifier) qualifiers[i];
                 condition.setQualifierStr(q.value());
                 tmp = new Annotation[qualifiers.length - 1];
-                System.arraycopy(qualifiers, 0, tmp, 0, i - 1);
-                System.arraycopy(qualifiers, i + 1, tmp, i, qualifiers.length - i - 1);
+                for (int j = 0; j < i; j++) {
+                    tmp[j] = qualifiers[j];
+                }
+                for (int j = i + 1; j < qualifiers.length; j++) {
+                    tmp[j - 1] = qualifiers[j];
+                }
                 condition.setQualifiers(tmp);
                 return condition;
             }

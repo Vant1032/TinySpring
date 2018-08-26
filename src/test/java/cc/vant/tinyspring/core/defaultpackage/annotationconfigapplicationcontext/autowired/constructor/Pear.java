@@ -2,13 +2,14 @@ package cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontex
 
 import cc.vant.tinyspring.core.annotations.Autowired;
 import cc.vant.tinyspring.core.annotations.Bean;
+import cc.vant.tinyspring.core.annotations.Component;
 import cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontext.autowired.Apple;
 
 /**
  * @author Vant
  * @since 2018/8/10 23:34
  */
-@Bean
+@Component
 public class Pear {
 
     private Apple apple;
