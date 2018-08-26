@@ -4,7 +4,7 @@ import cc.vant.tinyspring.core.annotations.Bean;
 
 /**
  * @author Vant
- * @version 2018/8/15 上午 12:37
+ * @since 2018/8/15 12:37
  */
 @Bean
 public class ISon extends AFather implements IFather {

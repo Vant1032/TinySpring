@@ -5,7 +5,7 @@ import cc.vant.tinyspring.core.annotations.Configuration;
 
 /**
  * @author Vant
- * @version 2018/8/15 上午 12:39
+ * @since 2018/8/15 12:39
  */
 @Configuration
 @ComponentScan(basePackageClasses = {SpringConfig.class})

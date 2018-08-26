@@ -6,7 +6,7 @@ import cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontext
 
 /**
  * @author Vant
- * @version 2018/8/10 下午 11:34
+ * @since 2018/8/10 23:34
  */
 @Bean
 public class Pear {

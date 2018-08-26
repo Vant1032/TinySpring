@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 /**
  * @author Vant
- * @version 2018/8/22 下午 5:09
+ * @since 2018/8/22 17:09
  */
 public class DefaultBeanDefinition implements BeanDefinition {
     private ScopeType scopeType = ScopeType.Singleton;
@@ -61,13 +61,14 @@ public class DefaultBeanDefinition implements BeanDefinition {
         this.type = type;
     }
 
+    @Nullable
     @Override
     public String getQualifierString() {
         return qualifierString;
     }
 
     @Override
-    public void setQualifierString(String qualifierString) {
+    public void setQualifierString(@Nullable String qualifierString) {
         this.qualifierString = qualifierString;
     }
 

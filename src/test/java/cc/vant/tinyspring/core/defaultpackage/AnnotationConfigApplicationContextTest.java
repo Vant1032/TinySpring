@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Vant
- * @version 2018/8/4 上午 12:18
+ * @since 2018/8/4 12:18
  */
 class AnnotationConfigApplicationContextTest {
     @Test

@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Vant
- * @version 2018/8/13 下午 11:18
+ * @since 2018/8/13 23:18
  */
 public class BeanContainer implements AutoCloseable {
     private final Map<String, BeanGenerator> beanMap = new ConcurrentHashMap<>(256);

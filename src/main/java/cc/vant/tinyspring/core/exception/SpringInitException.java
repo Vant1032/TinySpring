@@ -2,7 +2,7 @@ package cc.vant.tinyspring.core.exception;
 
 /**
  * @author Vant
- * @version 2018/8/9 下午 9:01
+ * @since 2018/8/9 21:01
  */
 public class SpringInitException extends RuntimeException {
     public SpringInitException() {

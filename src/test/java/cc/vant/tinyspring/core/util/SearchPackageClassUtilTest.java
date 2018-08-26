@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Vant
- * @version 2018/8/3 下午 4:42
+ * @since 2018/8/3 16:42
  */
 class SearchPackageClassUtilTest {
     @Test

@@ -2,7 +2,7 @@ package cc.vant.tinyspring.core.exception;
 
 /**
  * @author Vant
- * @version 2018/8/4 下午 2:20
+ * @since 2018/8/4 14:20
  */
 public class NoSuchBeanDefinitionException extends RuntimeException {
     public NoSuchBeanDefinitionException() {

@@ -4,7 +4,7 @@ import cc.vant.tinyspring.core.annotations.Configuration;
 
 /**
  * @author Vant
- * @version 2018/8/14 下午 11:02
+ * @since 2018/8/14 23:02
  */
 @Configuration
 public class SpringConfig1 {

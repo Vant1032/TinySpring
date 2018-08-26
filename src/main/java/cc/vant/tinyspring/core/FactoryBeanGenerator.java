@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author Vant
- * @version 2018/8/22 下午 2:38
+ * @since 2018/8/22 14:38
  */
 public class FactoryBeanGenerator implements BeanGenerator {
     private FactoryBean<?> factoryBean;

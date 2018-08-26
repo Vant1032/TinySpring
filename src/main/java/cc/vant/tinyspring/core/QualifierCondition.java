@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 /**
  * @author Vant
- * @version 2018/8/24 下午 7:59
+ * @since 2018/8/24 19:59
  */
 public class QualifierCondition {
     private String qualifierStr;

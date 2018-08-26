@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Vant
- * @version 2018/8/9 上午 1:32
+ * @since 2018/8/9 1:32
  */
 public class AutowiredInAnnotationConfigApplicationContextTest {
     @Test

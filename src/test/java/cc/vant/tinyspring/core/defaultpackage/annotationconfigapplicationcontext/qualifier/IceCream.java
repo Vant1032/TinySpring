@@ -4,7 +4,7 @@ import cc.vant.tinyspring.core.annotations.Qualifier;
 
 /**
  * @author Vant
- * @version 2018/8/22 下午 4:19
+ * @since 2018/8/22 16:19
  */
 @Qualifier("cold")
 public class IceCream {

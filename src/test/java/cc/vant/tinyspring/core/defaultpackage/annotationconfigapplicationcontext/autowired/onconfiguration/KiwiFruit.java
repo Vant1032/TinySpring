@@ -2,7 +2,7 @@ package cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontex
 
 /**
  * @author Vant
- * @version 2018/8/11 下午 6:36
+ * @since 2018/8/11 18:36
  */
 public class KiwiFruit {
     int weight;

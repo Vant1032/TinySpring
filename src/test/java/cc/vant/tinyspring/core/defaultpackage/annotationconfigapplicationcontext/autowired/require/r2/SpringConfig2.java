@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * @author Vant
- * @version 2018/8/15 下午 1:46
+ * @since 2018/8/15 13:46
  */
 @Configuration
 @ComponentScan(basePackageClasses = {SpringConfig2.class})

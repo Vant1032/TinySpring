@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 /**
  * @author Vant
- * @version 2018/8/10 下午 9:52
+ * @since 2018/8/10 21:52
  */
 @Bean
 public class CauseWrong {

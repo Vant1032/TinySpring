@@ -2,7 +2,7 @@ package cc.vant.tinyspring.core.exception;
 
 /**
  * @author Vant
- * @version 2018/8/15 上午 12:08
+ * @since 2018/8/15 12:08
  */
 public class MultipleBeanDefinition extends RuntimeException {
     public MultipleBeanDefinition() {

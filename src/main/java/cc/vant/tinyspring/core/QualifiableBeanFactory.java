@@ -4,7 +4,7 @@ import java.lang.annotation.Annotation;
 
 /**
  * @author Vant
- * @version 2018/8/25 下午 9:08
+ * @since 2018/8/25 21:08
  */
 public interface QualifiableBeanFactory extends BeanFactory {
     <T> T getBeanByQualifier(Class<T> requireType, Annotation... qualifiers);

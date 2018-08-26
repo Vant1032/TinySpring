@@ -2,7 +2,7 @@ package cc.vant.tinyspring.core.util;
 
 /**
  * @author Vant
- * @version 2018/8/12 下午 12:11
+ * @since 2018/8/12 12:11
  */
 public class Pair<K, V> {
     private K key;

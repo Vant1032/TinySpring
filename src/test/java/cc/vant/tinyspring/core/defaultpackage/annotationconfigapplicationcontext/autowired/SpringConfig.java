@@ -5,7 +5,7 @@ import cc.vant.tinyspring.core.annotations.Configuration;
 
 /**
  * @author Vant
- * @version 2018/8/9 上午 1:30
+ * @since 2018/8/9 1:30
  */
 @Configuration
 @ComponentScan(basePackageClasses = {MarkAutowired.class})

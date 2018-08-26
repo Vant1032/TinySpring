@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Vant
- * @version 2018/8/4 下午 1:50
+ * @since 2018/8/4 13:50
  */
 public abstract class StringUtils {
     @NotNull

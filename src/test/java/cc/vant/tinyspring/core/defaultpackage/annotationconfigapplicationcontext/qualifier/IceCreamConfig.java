@@ -5,7 +5,7 @@ import cc.vant.tinyspring.core.annotations.Configuration;
 
 /**
  * @author Vant
- * @version 2018/8/22 下午 4:21
+ * @since 2018/8/22 16:21
  */
 @Configuration
 public class IceCreamConfig {

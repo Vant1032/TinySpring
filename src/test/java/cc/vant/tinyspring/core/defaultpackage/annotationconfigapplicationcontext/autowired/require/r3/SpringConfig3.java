@@ -8,7 +8,7 @@ import cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontext
 
 /**
  * @author Vant
- * @version 2018/8/15 下午 4:36
+ * @since 2018/8/15 16:36
  */
 @Configuration
 @ComponentScan(basePackageClasses = SpringConfig3.class)

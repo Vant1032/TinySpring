@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Vant
- * @version 2018/8/14 上午 9:51
+ * @since 2018/8/14 9:51
  */
 public interface BeanFactory {
     Object getBean(String beanName);

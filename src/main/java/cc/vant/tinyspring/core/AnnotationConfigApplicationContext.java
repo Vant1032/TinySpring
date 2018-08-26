@@ -31,7 +31,7 @@ import java.util.Set;
  * 添加了@Autowired接口和抽象类支持
  *
  * @author Vant
- * @version 2018/8/3 上午 12:41
+ * @since 2018/8/3 12:41
  */
 public class AnnotationConfigApplicationContext implements BeanFactory, AutoCloseable {
     @NotNull

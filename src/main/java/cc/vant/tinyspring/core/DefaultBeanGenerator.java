@@ -16,7 +16,7 @@ import java.util.ArrayList;
  * 只负责产生Bean
  *
  * @author Vant
- * @version 2018/8/13 下午 11:28
+ * @since 2018/8/13 23:28
  */
 public class DefaultBeanGenerator implements BeanGenerator {
     private Constructor<?> constructor;

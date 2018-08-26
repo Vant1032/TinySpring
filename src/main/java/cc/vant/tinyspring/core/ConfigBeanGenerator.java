@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
  * 用于通过Config上的方法来生成bean
  *
  * @author Vant
- * @version 2018/8/13 下午 11:29
+ * @since 2018/8/13 23:29
  */
 public class ConfigBeanGenerator implements BeanGenerator {
     private Object configInstance;

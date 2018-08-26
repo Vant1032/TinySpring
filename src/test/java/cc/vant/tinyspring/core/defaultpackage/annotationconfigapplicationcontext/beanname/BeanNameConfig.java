@@ -5,7 +5,7 @@ import cc.vant.tinyspring.core.annotations.Configuration;
 
 /**
  * @author Vant
- * @version 2018/8/18 下午 1:37
+ * @since 2018/8/18 13:37
  */
 @Configuration
 public class BeanNameConfig {

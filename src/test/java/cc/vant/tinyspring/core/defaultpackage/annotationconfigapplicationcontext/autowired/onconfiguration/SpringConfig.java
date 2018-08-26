@@ -6,7 +6,7 @@ import cc.vant.tinyspring.core.annotations.Configuration;
 
 /**
  * @author Vant
- * @version 2018/8/11 下午 6:35
+ * @since 2018/8/11 18:35
  */
 @Configuration
 @ComponentScan(basePackageClasses = {KiwiFruit.class})

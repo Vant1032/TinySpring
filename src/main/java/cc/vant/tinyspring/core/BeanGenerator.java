@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author Vant
- * @version 2018/8/13 下午 11:24
+ * @since 2018/8/13 23:24
  */
 public interface BeanGenerator {
     /**

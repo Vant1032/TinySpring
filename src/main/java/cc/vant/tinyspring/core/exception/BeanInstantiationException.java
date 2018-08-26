@@ -2,7 +2,7 @@ package cc.vant.tinyspring.core.exception;
 
 /**
  * @author Vant
- * @version 2018/8/9 下午 2:24
+ * @since 2018/8/9 14:24
  */
 public class BeanInstantiationException extends RuntimeException {
     public BeanInstantiationException() {

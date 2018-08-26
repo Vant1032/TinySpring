@@ -2,7 +2,7 @@ package cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontex
 
 /**
  * @author Vant
- * @version 2018/8/15 上午 12:36
+ * @since 2018/8/15 12:36
  */
 public interface IFather {
     void foo();

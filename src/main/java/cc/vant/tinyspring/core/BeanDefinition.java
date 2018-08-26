@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 /**
  * @author Vant
- * @version 2018/8/22 下午 4:38
+ * @since 2018/8/22 16:38
  */
 public interface BeanDefinition {
     ScopeType getScopeType();

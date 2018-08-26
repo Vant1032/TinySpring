@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * 指定bean的产生方式,
  *
  * @author Vant
- * @version 2018/8/3 上午 8:41
+ * @since 2018/8/3 8:41
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})

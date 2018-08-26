@@ -2,7 +2,7 @@ package cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontex
 
 /**
  * @author Vant
- * @version 2018/8/9 下午 1:46
+ * @since 2018/8/9 13:46
  */
 public class MarkAutowired {
 }

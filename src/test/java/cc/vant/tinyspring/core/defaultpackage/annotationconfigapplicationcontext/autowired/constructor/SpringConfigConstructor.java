@@ -6,7 +6,7 @@ import cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontext
 
 /**
  * @author Vant
- * @version 2018/8/10 下午 11:35
+ * @since 2018/8/10 23:35
  */
 @Configuration
 @ComponentScan(basePackageClasses = {Pear.class, MarkAutowired.class})

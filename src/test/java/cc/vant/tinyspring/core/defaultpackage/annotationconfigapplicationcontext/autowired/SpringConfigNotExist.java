@@ -6,7 +6,7 @@ import cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontext
 
 /**
  * @author Vant
- * @version 2018/8/11 上午 11:58
+ * @since 2018/8/11 11:58
  */
 @Configuration
 @ComponentScan(basePackageClasses = {CauseWrong.class})

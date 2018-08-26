@@ -2,7 +2,7 @@ package cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontex
 
 /**
  * @author Vant
- * @version 2018/8/14 下午 11:03
+ * @since 2018/8/14 23:03
  */
 public class SpringConfig3 {
 }

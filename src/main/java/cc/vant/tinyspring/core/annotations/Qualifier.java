@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 
 /**
  * @author Vant
- * @version 2018/8/19 上午 12:32
+ * @since 2018/8/19 12:32
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE, ElementType.ANNOTATION_TYPE})

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author Vant
- * @version 2018/8/18 下午 1:35
+ * @since 2018/8/18 13:35
  */
 public class BeanNameTest {
     @Test

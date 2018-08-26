@@ -5,7 +5,7 @@ import cc.vant.tinyspring.core.annotations.Bean;
 
 /**
  * @author Vant
- * @version 2018/8/9 上午 1:25
+ * @since 2018/8/9 1:25
  */
 @Bean
 public class RedDeliciousApple {
