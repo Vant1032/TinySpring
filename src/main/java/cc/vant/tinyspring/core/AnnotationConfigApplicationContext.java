@@ -46,7 +46,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
     public AnnotationConfigApplicationContext(@NotNull Class<?>... configs) {
         Set<String> scannedPackage = new HashSet<>();
         for (Class<?> config : configs) {
-            if (config.isAnnotationPresent(Configuration.class)) {
+            if (!config.isAnnotationPresent(Configuration.class)) {
                 throw new SpringInitException(config.getName() + " is not annotated by Configuration");
             }
 
@@ -72,7 +72,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         final Method[] methods = config.getDeclaredMethods();
         for (Method method : methods) {
             final Bean bean = method.getAnnotation(Bean.class);
-            if (method.getParameterCount() > 0 && method.isAnnotationPresent(Autowired.class)) {
+            if (method.getParameterCount() > 0 && !method.isAnnotationPresent(Autowired.class)) {
                 throw new SpringInitException(method.getName() + " should use @Autowired");
             }
             if (bean != null) {

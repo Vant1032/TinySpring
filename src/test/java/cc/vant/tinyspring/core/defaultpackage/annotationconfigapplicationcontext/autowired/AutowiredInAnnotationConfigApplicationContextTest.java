@@ -36,10 +36,9 @@ public class AutowiredInAnnotationConfigApplicationContextTest {
     @Test
     void testAutowiredNotExist() {
         //将会模拟autowired真实应用场景
-        assertThrows(NoSuchBeanDefinitionException.class, () -> {
-            AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigNotExist.class);
-            final CauseWrong bean = context.getBean(CauseWrong.class);
-        });
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigNotExist.class);
+        final CauseWrong bean = context.getBean(CauseWrong.class);
+        assertNull(bean.getScanner());
     }
 
     @Test

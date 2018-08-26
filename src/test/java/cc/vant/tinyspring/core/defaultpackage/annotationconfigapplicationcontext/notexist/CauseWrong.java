@@ -12,5 +12,9 @@ import java.util.Scanner;
 @Bean
 public class CauseWrong {
     @Autowired
-    Scanner scanner;
+    private Scanner scanner;
+
+    public Scanner getScanner() {
+        return scanner;
+    }
 }
