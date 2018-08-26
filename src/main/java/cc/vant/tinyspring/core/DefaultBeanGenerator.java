@@ -2,7 +2,6 @@ package cc.vant.tinyspring.core;
 
 import cc.vant.tinyspring.core.annotations.Autowired;
 import cc.vant.tinyspring.core.annotations.ScopeType;
-import cc.vant.tinyspring.core.exception.BeanInstantiationException;
 import cc.vant.tinyspring.core.exception.NoSuchBeanDefinitionException;
 import org.jetbrains.annotations.NotNull;
 
@@ -66,7 +65,7 @@ public class DefaultBeanGenerator implements BeanGenerator {
         Object instance;
         if (constructor == null) {
             instance = beanDefinition.getType().newInstance();
-        }else if (constructor.getParameterCount() == 0) {
+        } else if (constructor.getParameterCount() == 0) {
             instance = constructor.newInstance();
         } else {
             boolean required = constructor.getAnnotation(Autowired.class).required();
@@ -85,13 +84,17 @@ public class DefaultBeanGenerator implements BeanGenerator {
             }
             Object bean;
             if (field.getAnnotation(Autowired.class).required()) {
-                bean = beanFactory.getBean(field.getType());
-            } else {
-                try {
+                if (QualifierCondition.get(field.getAnnotations()).empty()) {
                     bean = beanFactory.getBean(field.getType());
-                } catch (@NotNull NoSuchBeanDefinitionException | BeanInstantiationException e) {
-                    bean = null;
+                } else {
+                    bean = beanFactory.getBeanByQualifier(field.getType());
                 }
+
+                if (bean == null) {
+                    throw new NoSuchBeanDefinitionException(field.getType().getName());
+                }
+            } else {
+                bean = beanFactory.getBean(field.getType());
             }
             field.set(instance, bean);
         }
@@ -118,10 +121,11 @@ public class DefaultBeanGenerator implements BeanGenerator {
 
     /**
      * 提供对@Qualifier的支持来查找一组Bean
-     * @param required true如果找不到Bean抛异常,false则找不到Bean用null填充
+     *
+     * @param required     true如果找不到Bean抛异常,false则找不到Bean用null填充
      * @param requireTypes 待填充的Bean的class类型
-     * @param annotations 里面包含各个Bean所需的Qualifier,顺序与requireTypes一致
-     * @param beanFactory 用于处理依赖
+     * @param annotations  里面包含各个Bean所需的Qualifier,顺序与requireTypes一致
+     * @param beanFactory  用于处理依赖
      * @return Beans
      */
     @SuppressWarnings("unchecked")

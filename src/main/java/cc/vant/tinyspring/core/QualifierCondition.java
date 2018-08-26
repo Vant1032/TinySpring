@@ -2,6 +2,7 @@ package cc.vant.tinyspring.core;
 
 import cc.vant.tinyspring.core.annotations.Qualifier;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -12,22 +13,25 @@ import java.util.Arrays;
  * @since 2018/8/24 19:59
  */
 public class QualifierCondition {
+    @Nullable
     private String qualifierStr;
-    private Annotation[] qualifiers;
+    @NotNull
+    private Annotation[] qualifiers = {};
 
     public QualifierCondition() {
     }
 
-    public QualifierCondition(String qualifierStr, Annotation[] qualifiers) {
+    public QualifierCondition(@Nullable String qualifierStr, @NotNull Annotation[] qualifiers) {
         this.qualifierStr = qualifierStr;
         this.qualifiers = qualifiers;
     }
 
+    @Nullable
     public String getQualifierStr() {
         return qualifierStr;
     }
 
-    public void setQualifierStr(String qualifierStr) {
+    public void setQualifierStr(@Nullable String qualifierStr) {
         this.qualifierStr = qualifierStr;
     }
 
@@ -35,7 +39,7 @@ public class QualifierCondition {
         return qualifiers;
     }
 
-    public void setQualifiers(Annotation[] qualifiers) {
+    public void setQualifiers(@NotNull Annotation[] qualifiers) {
         this.qualifiers = qualifiers;
     }
 
@@ -63,5 +67,9 @@ public class QualifierCondition {
         }
         result.setQualifiers(annotations.toArray(new Annotation[]{}));
         return result;
+    }
+
+    public boolean empty() {
+        return qualifierStr == null && qualifiers.length == 0;
     }
 }
