@@ -1,0 +1,26 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'cc.vant.tinySpring'
+version = '1.0-SNAPSHOT'
+
+description = """"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+dependencies {
+    compile group: 'org.jetbrains', name: 'annotations', version:'16.0.2'
+    testCompile group: 'org.junit.platform', name: 'junit-platform-launcher', version:'1.2.0'
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version:'5.2.0'
+    testCompile group: 'org.junit.vintage', name: 'junit-vintage-engine', version:'5.2.0'
+}

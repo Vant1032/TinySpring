@@ -31,3 +31,8 @@ secret.md
 local/
 target/
 
+!/gradle/
+!/build.gradle
+!/gradlew.bat
+!/settings.gradle
+!/gradlew
