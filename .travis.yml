@@ -8,7 +8,7 @@ cache:
   - $HOME/.gradle/wrapper/
 
 script:
-- "./gradlew assembleRelease"
+- "./gradlew test"
 
 before_install:
 - chmod +x gradlew
