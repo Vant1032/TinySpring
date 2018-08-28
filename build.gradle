@@ -1,38 +1,60 @@
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'jacoco'
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: 'jacoco'
 
-group = 'cc.vant.tinySpring'
-version = '1.0-SNAPSHOT'
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
-description = """"""
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-tasks.withType(JavaCompile) {
-	options.encoding = 'UTF-8'
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled = true
-        html.enabled = true
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
     }
 }
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-    jcenter()
+subprojects {
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.enabled = true
+            html.enabled = true
+        }
+    }
+
+
+
+    test {
+        useJUnitPlatform()
+    }
+
+    dependencies {
+        compile group: 'org.jetbrains', name: 'annotations', version:'16.0.2'
+        testCompile group: 'org.junit.platform', name: 'junit-platform-launcher', version:'1.2.0'
+        testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version:'5.2.0'
+        testCompile group: 'org.junit.vintage', name: 'junit-vintage-engine', version:'5.2.0'
+    }
 }
 
-test {
-    useJUnitPlatform()
+task codeCoverageReport(type: JacocoReport) {
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+
+    subprojects.each {
+        sourceSets it.sourceSets.main
+    }
+
+    reports {
+        xml.enabled true
+        xml.destination "${buildDir}/reports/jacoco/report.xml"
+        html.enabled true
+        csv.enabled false
+    }
 }
 
-dependencies {
-    compile group: 'org.jetbrains', name: 'annotations', version:'16.0.2'
-    testCompile group: 'org.junit.platform', name: 'junit-platform-launcher', version:'1.2.0'
-    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version:'5.2.0'
-    testCompile group: 'org.junit.vintage', name: 'junit-vintage-engine', version:'5.2.0'
+codeCoverageReport.dependsOn {
+    subprojects*.test
 }
