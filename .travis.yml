@@ -4,9 +4,11 @@ jdk:
 
 cache:
   directories:
-  - '$HOME/.m2/repository'
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/
 
-script: "mvn test"
 
-after_success:
-- bash <(curl -s https://codecov.io/bash)
+test:
+  post:
+  - if [ -e ./gradlew ]; then ./gradlew jacocoTestReport;else gradle jacocoTestReport;fi
+  - bash <(curl -s https://codecov.io/bash)

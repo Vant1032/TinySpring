@@ -1,5 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'jacoco'
 
 group = 'cc.vant.tinySpring'
 version = '1.0-SNAPSHOT'
@@ -12,12 +13,23 @@ tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
 }
 
-
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
 
 repositories {
     mavenLocal()
     mavenCentral()
+    jcenter()
 }
+
+test {
+    useJUnitPlatform()
+}
+
 dependencies {
     compile group: 'org.jetbrains', name: 'annotations', version:'16.0.2'
     testCompile group: 'org.junit.platform', name: 'junit-platform-launcher', version:'1.2.0'
