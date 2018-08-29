@@ -1,7 +1,6 @@
 package cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontext.qualifier;
 
 import cc.vant.tinyspring.core.annotations.Autowired;
-import cc.vant.tinyspring.core.annotations.Bean;
 import cc.vant.tinyspring.core.annotations.Component;
 import cc.vant.tinyspring.core.annotations.Qualifier;
 
@@ -10,7 +9,7 @@ import cc.vant.tinyspring.core.annotations.Qualifier;
  * @since 2018/8/26 18:00
  */
 @Component
-public class Consume {
+class Consume {
     @Autowired
     @Qualifier("big")
     private IceCream iceCream;

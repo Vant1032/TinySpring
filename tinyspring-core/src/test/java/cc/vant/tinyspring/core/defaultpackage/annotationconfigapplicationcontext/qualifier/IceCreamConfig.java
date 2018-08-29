@@ -11,7 +11,7 @@ import cc.vant.tinyspring.core.annotations.Qualifier;
  */
 @Configuration
 @ComponentScan(basePackageClasses = {IceCreamConfig.class})
-public class IceCreamConfig {
+class IceCreamConfig {
     @Bean
     @Qualifier("cold")
     IceCream getIceCream() {

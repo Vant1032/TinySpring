@@ -10,5 +10,5 @@ import cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontext
  */
 @Configuration
 @ComponentScan(basePackageClasses = {CauseWrong.class})
-public class SpringConfigNotExist {
+class SpringConfigNotExist {
 }

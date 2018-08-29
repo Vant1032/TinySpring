@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
  * @since 2018/8/22 16:19
  */
 
-public class QualifierTest {
+class QualifierTest {
     @Test
     void test() {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(IceCreamConfig.class);

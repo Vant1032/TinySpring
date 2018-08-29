@@ -26,8 +26,8 @@ public class ConfigBeanGenerator implements BeanGenerator {
      */
     public ConfigBeanGenerator(Object configInstance, Method method, BeanDefinition beanDefinition) {
         this.configInstance = configInstance;
-        this.method = method;
-        this.beanDefinition = beanDefinition;
+        setMethod(method);
+        setBeanDefinition(beanDefinition);
     }
 
     @Override
@@ -42,10 +42,6 @@ public class ConfigBeanGenerator implements BeanGenerator {
     }
 
     public Object generateNew(@NotNull QualifiableBeanFactory beanFactory) throws InvocationTargetException, IllegalAccessException {
-        if (!method.isAccessible()) {
-            method.setAccessible(true);
-        }
-
         final Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameterTypes.length > 0) {
             //添加@Qualifier支持
@@ -57,6 +53,16 @@ public class ConfigBeanGenerator implements BeanGenerator {
             return method.invoke(configInstance, args);
         }
         return method.invoke(configInstance);
+    }
+
+    public void setMethod(Method method) {
+        if (method == null) {
+            return;
+        }
+        this.method = method;
+        if (!method.isAccessible()) {
+            method.setAccessible(true);
+        }
     }
 
     @Override

@@ -1,7 +1,18 @@
 package cc.vant.tinyspring.core;
 
 
-import cc.vant.tinyspring.core.annotations.*;
+import cc.vant.tinyspring.core.annotations.Autowired;
+import cc.vant.tinyspring.core.annotations.Bean;
+import cc.vant.tinyspring.core.annotations.Component;
+import cc.vant.tinyspring.core.annotations.ComponentScan;
+import cc.vant.tinyspring.core.annotations.Configuration;
+import cc.vant.tinyspring.core.annotations.Controller;
+import cc.vant.tinyspring.core.annotations.Primary;
+import cc.vant.tinyspring.core.annotations.Qualifier;
+import cc.vant.tinyspring.core.annotations.Repository;
+import cc.vant.tinyspring.core.annotations.Scope;
+import cc.vant.tinyspring.core.annotations.ScopeType;
+import cc.vant.tinyspring.core.annotations.Service;
 import cc.vant.tinyspring.core.exception.MultipleBeanDefinition;
 import cc.vant.tinyspring.core.exception.SpringInitException;
 import cc.vant.tinyspring.core.util.SearchPackageClassUtil;
@@ -12,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,8 +69,12 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
     private void handleConfigBean(@NotNull Class<?> config) {
         Object cfgInstance;
         try {
-            cfgInstance = config.newInstance();
-        } catch (@NotNull InstantiationException | IllegalAccessException e) {
+            Constructor<?> defaultConstructor = config.getDeclaredConstructor();
+            if (!defaultConstructor.isAccessible()) {
+                defaultConstructor.setAccessible(true);
+            }
+            cfgInstance = defaultConstructor.newInstance();
+        } catch (@NotNull InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new SpringInitException("can not instantiate " + config.getName(), e);
         }
         final Method[] methods = config.getDeclaredMethods();

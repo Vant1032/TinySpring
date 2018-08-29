@@ -4,6 +4,6 @@ package cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontex
  * @author Vant
  * @since 2018/8/9 1:27
  */
-public class FujiApple {
+class FujiApple {
 
 }

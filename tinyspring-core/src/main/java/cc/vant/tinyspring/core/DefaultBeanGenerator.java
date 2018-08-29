@@ -24,24 +24,14 @@ public class DefaultBeanGenerator implements BeanGenerator {
     private Object beanInstance;
     private BeanDefinition beanDefinition;
 
-    public DefaultBeanGenerator(BeanDefinition beanDefinition) {
-        this.beanDefinition = beanDefinition;
-    }
-
     public DefaultBeanGenerator(Constructor<?> constructor, BeanDefinition beanDefinition) {
-        this.constructor = constructor;
+        setConstructor(constructor);
         this.beanDefinition = beanDefinition;
     }
 
-    public DefaultBeanGenerator(Constructor<?> constructor, Field field, BeanDefinition beanDefinition) {
-        this.constructor = constructor;
-        fields.add(field);
-        this.beanDefinition = beanDefinition;
-    }
 
-    public DefaultBeanGenerator(Field field, BeanDefinition beanDefinition) {
-        fields.add(field);
-        this.beanDefinition = beanDefinition;
+    public DefaultBeanGenerator(BeanDefinition beanDefinition) {
+        this(null, beanDefinition);
     }
 
     @Override
@@ -62,9 +52,17 @@ public class DefaultBeanGenerator implements BeanGenerator {
      */
     @SuppressWarnings("unchecked")
     private Object generateNew(@NotNull QualifiableBeanFactory beanFactory) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        Object instance;
+        Object instance = null;
         if (constructor == null) {
-            instance = beanDefinition.getType().newInstance();
+            try {
+                Constructor<?> defaultConstructor = beanDefinition.getType().getDeclaredConstructor();
+                if (!defaultConstructor.isAccessible()) {
+                    defaultConstructor.setAccessible(true);
+                }
+                instance = defaultConstructor.newInstance();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
         } else if (constructor.getParameterCount() == 0) {
             instance = constructor.newInstance();
         } else {
@@ -73,15 +71,11 @@ public class DefaultBeanGenerator implements BeanGenerator {
             Annotation[][] parameterAnnotations = constructor.getParameterAnnotations();
 
             Object[] objects = fillBean(required, parameterTypes, parameterAnnotations, beanFactory);
-
             instance = constructor.newInstance(objects);
         }
 
         //构建field
         for (Field field : fields) {
-            if (!field.isAccessible()) {
-                field.setAccessible(true);
-            }
             Object bean;
             if (field.getAnnotation(Autowired.class).required()) {
                 if (QualifierCondition.get(field.getAnnotations()).empty()) {
@@ -103,10 +97,18 @@ public class DefaultBeanGenerator implements BeanGenerator {
 
     public void setConstructor(Constructor<?> constructor) {
         this.constructor = constructor;
+        if (constructor == null) return;
+        if (!constructor.isAccessible()) {
+            constructor.setAccessible(true);
+        }
     }
 
     public void addField(Field field) {
+        if (field == null) return;
         fields.add(field);
+        if (!field.isAccessible()) {
+            field.setAccessible(true);
+        }
     }
 
     @Override

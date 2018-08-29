@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Vant
  * @since 2018/8/9 1:32
  */
-public class AutowiredInAnnotationConfigApplicationContextTest {
+class AutowiredInAnnotationConfigApplicationContextTest {
     @Test
     void testAutowired() {
         //将会模拟autowired真实应用场景

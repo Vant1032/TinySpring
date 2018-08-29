@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/Vant1032/TinySpring.svg?branch=master)](https://travis-ci.org/Vant1032/TinySpring)
 [![codecov](https://codecov.io/gh/Vant1032/TinySpring/branch/master/graph/badge.svg)](https://codecov.io/gh/Vant1032/TinySpring)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/467a96a2d214405c93ad6e7c41ee5829)](https://www.codacy.com/app/Vant1032/TinySpring?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Vant1032/TinySpring&amp;utm_campaign=Badge_Grade)
 
 # 一个模仿spring的小框架
 ## 简介

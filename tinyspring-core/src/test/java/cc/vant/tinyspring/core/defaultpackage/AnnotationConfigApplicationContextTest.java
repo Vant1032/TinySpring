@@ -10,8 +10,6 @@ import cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontext
 import cc.vant.tinyspring.core.exception.SpringInitException;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -21,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class AnnotationConfigApplicationContextTest {
     @Test
     void multiConfig() {
+        //noinspection unused
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig1.class, SpringConfig2.class);
 
         assertThrows(SpringInitException.class, () -> {

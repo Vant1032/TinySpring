@@ -7,8 +7,9 @@ import cc.vant.tinyspring.core.annotations.Configuration;
  * @author Vant
  * @since 2018/8/18 13:37
  */
+@SuppressWarnings("SameReturnValue")
 @Configuration
-public class BeanNameConfig {
+class BeanNameConfig {
     @Bean
     Integer getHundred() {
         return 100;

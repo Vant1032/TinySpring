@@ -1,7 +1,6 @@
 package cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontext.autowired.constructor;
 
 import cc.vant.tinyspring.core.annotations.Autowired;
-import cc.vant.tinyspring.core.annotations.Bean;
 import cc.vant.tinyspring.core.annotations.Component;
 import cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontext.autowired.Apple;
 
@@ -9,6 +8,7 @@ import cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontext
  * @author Vant
  * @since 2018/8/10 23:34
  */
+@SuppressWarnings("CanBeFinal")
 @Component
 public class Pear {
 

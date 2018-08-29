@@ -10,7 +10,7 @@ import java.util.Arrays;
 public class Test {
     public static void main(String[] args) {
 
-        System.out.println(Arrays.asList(new Annotation[]{}));
+        System.out.println(Arrays.asList());
 
         for (String arg : args) {
             System.out.println("arg = " + arg);

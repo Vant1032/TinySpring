@@ -1,7 +1,6 @@
 package cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontext.autowired;
 
 import cc.vant.tinyspring.core.annotations.Autowired;
-import cc.vant.tinyspring.core.annotations.Bean;
 import cc.vant.tinyspring.core.annotations.Component;
 
 /**
@@ -9,7 +8,7 @@ import cc.vant.tinyspring.core.annotations.Component;
  * @since 2018/8/9 1:25
  */
 @Component
-public class RedDeliciousApple {
+class RedDeliciousApple {
     @Autowired
     private Apple apple;
 

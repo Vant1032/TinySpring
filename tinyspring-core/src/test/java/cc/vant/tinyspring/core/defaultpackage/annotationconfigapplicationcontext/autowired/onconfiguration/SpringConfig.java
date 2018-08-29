@@ -12,7 +12,7 @@ import cc.vant.tinyspring.core.annotations.Configuration;
 @ComponentScan(basePackageClasses = {KiwiFruit.class})
 public class SpringConfig {
     @Bean
-    KiwiFruit getKiwiFruid() {
+    KiwiFruit getKiwiFruit() {
         final KiwiFruit kiwiFruit = new KiwiFruit();
         kiwiFruit.weight = 1000;
         return kiwiFruit;

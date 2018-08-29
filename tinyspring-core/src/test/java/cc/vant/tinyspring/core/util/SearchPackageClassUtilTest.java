@@ -33,7 +33,7 @@ class SearchPackageClassUtilTest {
         });
     }
 
-    static class Name {
+    private static class Name {
     }
 
 }

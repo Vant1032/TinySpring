@@ -1,6 +1,5 @@
 package cc.vant.tinyspring.core.defaultpackage.annotationconfigapplicationcontext.getbean;
 
-import cc.vant.tinyspring.core.annotations.Bean;
 import cc.vant.tinyspring.core.annotations.Component;
 
 /**

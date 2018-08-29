@@ -25,7 +25,6 @@
 hs_err_pid*
 
 .idea/
-TinySpring.iml
 secret.md
 !/tinyspring-core/src/test/
 local/

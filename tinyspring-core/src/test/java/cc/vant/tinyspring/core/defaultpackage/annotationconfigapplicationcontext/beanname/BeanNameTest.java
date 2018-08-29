@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
  * @author Vant
  * @since 2018/8/18 13:35
  */
-public class BeanNameTest {
+class BeanNameTest {
     @Test
     void beanNameSame() {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(BeanNameConfig.class);
