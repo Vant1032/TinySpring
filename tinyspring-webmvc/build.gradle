@@ -1,4 +1,8 @@
+apply plugin: 'war'
+
 
 dependencies {
     compile project(":tinyspring-core")
+    // https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
 }

@@ -1,4 +1,5 @@
 rootProject.name = 'TinySpring'
 
 include 'tinyspring-core'
+include 'tinyspring-aop'
 include 'tinyspring-webmvc'

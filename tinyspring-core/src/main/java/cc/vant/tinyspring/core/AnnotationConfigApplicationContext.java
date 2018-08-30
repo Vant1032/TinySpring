@@ -47,7 +47,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
     /**
      * @param configs javaConfig类,用于配置TinySpring的类,该类必须用@Configuration注解
      */
-    public AnnotationConfigApplicationContext(@NotNull Class<?>... configs) {
+    public AnnotationConfigApplicationContext(@NotNull final Class<?>... configs) {
         Set<String> scannedPackage = new HashSet<>();
         for (Class<?> config : configs) {
             if (!config.isAnnotationPresent(Configuration.class)) {
@@ -66,7 +66,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         }
     }
 
-    private void handleConfigBean(@NotNull Class<?> config) {
+    private void handleConfigBean(@NotNull final Class<?> config) {
         Object cfgInstance;
         try {
             Constructor<?> defaultConstructor = config.getDeclaredConstructor();
@@ -105,7 +105,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
      * @return 所有扫描到的类, 已经去重
      */
     @NotNull
-    private Set<String> scanPackage(@NotNull ComponentScan... componentScans) {
+    private Set<String> scanPackage(@NotNull final ComponentScan... componentScans) {
         //由于包扫描会扫描子包,所以如果有子包存在,就删除,防止重复扫描,降低开销
         Set<String> packageNames = new HashSet<>();
         for (ComponentScan componentScan : componentScans) {
@@ -118,9 +118,13 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         final String[] nameStrs = packageNames.toArray(new String[0]);
         int size = 0;
         for (int i = 0; i < nameStrs.length; i++) {
-            if (nameStrs[i] == null) continue;
+            if (nameStrs[i] == null) {
+                continue;
+            }
             for (int j = i + 1; j < nameStrs.length; j++) {
-                if (nameStrs[j] == null) continue;
+                if (nameStrs[j] == null) {
+                    continue;
+                }
                 if (nameStrs[i].contains(nameStrs[j])) {
                     nameStrs[i] = null;
                     size++;
@@ -145,7 +149,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
      * @return className
      */
     @NotNull
-    private Set<String> searchClass(@NotNull String[] uniquePackage) {
+    private Set<String> searchClass(@NotNull final String[] uniquePackage) {
         Set<String> packClass = new HashSet<>();
         for (String pac : uniquePackage) {
             String[] searchPackageClass = SearchPackageClassUtil.searchPackageClass(pac);
@@ -165,7 +169,9 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
 
         //处理bean
         String value = resolveBeanAnnotation(beanClass);
-        if (value == null) return;
+        if (value == null) {
+            return;
+        }
         String beanName = StringUtils.generateBeanName(beanContainer, value, beanClass);
 
         //处理autowired
@@ -193,7 +199,9 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
         //fields
         final Field[] declaredFields = beanClass.getDeclaredFields();
         for (Field declaredField : declaredFields) {
-            if (!declaredField.isAnnotationPresent(Autowired.class)) continue;
+            if (!declaredField.isAnnotationPresent(Autowired.class)) {
+                continue;
+            }
             generator.addField(declaredField);
         }
 
@@ -244,7 +252,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
     @Nullable
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T getBean(@NotNull Class<T> requireType) {
+    public <T> T getBean(@NotNull final Class<T> requireType) {
         return beanFactory.getBean(requireType);
     }
 
@@ -261,7 +269,7 @@ public class AnnotationConfigApplicationContext implements BeanFactory, AutoClos
     /**
      * @return null若没发现@Component,@Service,@Repository,@Controller其中一个,否则返回其value
      */
-    private String resolveBeanAnnotation(Class<?> beanClass) {
+    private String resolveBeanAnnotation(final Class<?> beanClass) {
         Component co = beanClass.getAnnotation(Component.class);
         if (co != null) {
             return co.value();
