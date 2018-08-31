@@ -58,3 +58,7 @@ task codeCoverageReport(type: JacocoReport) {
 codeCoverageReport.dependsOn {
     subprojects*.test
 }
+
+task hello {
+    println("hahahha")
+}
