@@ -33,10 +33,10 @@ subprojects {
     }
 
     dependencies {
-        compile group: 'org.jetbrains', name: 'annotations', version:'16.0.2'
-        testCompile group: 'org.junit.platform', name: 'junit-platform-launcher', version:'1.2.0'
-        testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version:'5.2.0'
-        testCompile group: 'org.junit.vintage', name: 'junit-vintage-engine', version:'5.2.0'
+        compile group: 'org.jetbrains', name: 'annotations', version: '16.0.2'
+        testCompile group: 'org.junit.platform', name: 'junit-platform-launcher', version: '1.2.0'
+        testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.2.0'
+        testCompile group: 'org.junit.vintage', name: 'junit-vintage-engine', version: '5.2.0'
     }
 }
 
@@ -57,8 +57,4 @@ task codeCoverageReport(type: JacocoReport) {
 
 codeCoverageReport.dependsOn {
     subprojects*.test
-}
-
-task hello {
-    println("hahahha")
 }
